@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 project(v8-cpp CXX)
 
 add_definitions(
@@ -11,8 +13,10 @@ add_definitions(
     -fPIC
 )
 
+find_package(Node REQUIRED)
+
 include_directories(
-    /usr/local/include/node
+    ${NODE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 

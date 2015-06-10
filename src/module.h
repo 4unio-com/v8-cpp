@@ -32,7 +32,7 @@ class Module
 public:
     explicit Module(v8::Isolate* isolate)
         : isolate_(isolate)
-        , obj_(v8::ObjectTemplate::New(isolate))
+        , object_(v8::ObjectTemplate::New(isolate))
     {
     }
 
@@ -40,7 +40,7 @@ public:
     template <typename T>
     Module& add_class(char const* name, Class<T>& cl)
     {
-        obj_->Set(to_v8(isolate_, name), cl.class_.proto_template()->GetFunction());
+        object_->Set(to_v8(isolate_, name), cl.class_.proto_template()->GetFunction());
         return *this;
     }
 
@@ -48,14 +48,14 @@ public:
     template <typename F>
     Module& add_function(char const* name, F func)
     {
-        obj_->Set(to_v8(isolate_, name), internal::export_function(isolate_, func));
+        object_->Set(to_v8(isolate_, name), internal::export_function(isolate_, func));
         return *this;
     }
 
     // Create an instance of this module in V8
     v8::Local<v8::Object> create_prototype()
     {
-        return obj_->NewInstance();
+        return object_->NewInstance();
     }
 
     // v8::Isolate where the module live
@@ -66,7 +66,7 @@ public:
 
 private:
     v8::Isolate* isolate_;
-    v8::Handle<v8::ObjectTemplate> obj_;
+    v8::Handle<v8::ObjectTemplate> object_;
 };
 
 }  // namespace v8cpp

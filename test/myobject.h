@@ -50,3 +50,16 @@ public:
 private:
     double value_;
 };
+
+struct MyStruct
+{
+    bool bool_value;
+    int int_value;
+    std::string string_value = "hello";
+
+    void output()
+    {
+        std::cout << string_value << std::endl;
+        std::cout.flush();
+    }
+};
