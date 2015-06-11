@@ -1,1 +1,5 @@
 ./CMakeLists.txt.user
+./v8runner/deps/.gclient
+./v8runner/deps/.gclient_entries
+./v8runner/deps/depot_tools
+./v8runner/deps/v8
