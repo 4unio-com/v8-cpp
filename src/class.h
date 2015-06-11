@@ -57,8 +57,8 @@ public:
     typename std::enable_if<std::is_member_function_pointer<M>::value, Class&>::type add_method(char const* name,
                                                                                                 M mem_func)
     {
-        class_.class_template()->PrototypeTemplate()->Set(isolate(), name,
-                                                          internal::export_function(isolate(), mem_func));
+        class_.class_template()->PrototypeTemplate()->Set(class_.isolate(), name,
+                                                          internal::export_function(class_.isolate(), mem_func));
         return *this;
     }
 
@@ -66,7 +66,7 @@ public:
     template <typename F>
     typename std::enable_if<internal::IsFunctionPointer<F>::value, Class&>::type add_method(char const* name, F func)
     {
-        class_.proto_template()->Set(isolate(), name, internal::export_function(isolate(), func));
+        class_.proto_template()->Set(class_.isolate(), name, internal::export_function(class_.isolate(), func));
         return *this;
     }
 
@@ -74,7 +74,7 @@ public:
     template <typename P>
     Class& add_member(char const* name, P property, bool readonly = false)
     {
-        v8::HandleScope scope(isolate());
+        v8::HandleScope scope(class_.isolate());
 
         v8::AccessorGetterCallback getter = &internal::Class<T>::template get_member<P>;
         v8::AccessorSetterCallback setter = &internal::Class<T>::template set_member<P>;
@@ -83,18 +83,12 @@ public:
             setter = nullptr;
         }
 
-        v8::Handle<v8::Value> data = internal::export_value(isolate(), property);
+        v8::Handle<v8::Value> data = internal::export_value(class_.isolate(), property);
         v8::PropertyAttribute prop_attrs = v8::PropertyAttribute(v8::DontDelete | (setter ? 0 : v8::ReadOnly));
 
-        class_.class_template()->PrototypeTemplate()->SetAccessor(to_v8(isolate(), name), getter, setter, data,
+        class_.class_template()->PrototypeTemplate()->SetAccessor(to_v8(class_.isolate(), name), getter, setter, data,
                                                                   v8::DEFAULT, prop_attrs);
         return *this;
-    }
-
-    // v8::Isolate where the class bindings live
-    v8::Isolate* isolate()
-    {
-        return class_.isolate();
     }
 
 private:

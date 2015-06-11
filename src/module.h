@@ -58,12 +58,6 @@ public:
         return object_->NewInstance();
     }
 
-    // v8::Isolate where the module live
-    v8::Isolate* isolate()
-    {
-        return isolate_;
-    }
-
 private:
     v8::Isolate* isolate_;
     v8::Handle<v8::ObjectTemplate> object_;
