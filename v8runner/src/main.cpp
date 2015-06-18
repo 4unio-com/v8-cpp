@@ -9,9 +9,16 @@ using namespace v8;
 extern "C" void node_module_register(void*) {}
 using InitFunc = void(Handle<Object> exports);
 
-Local<Object> require(std::string const& module_path)
+Local<Object> require(std::string module_path)
 {
     Local<Object> exports = Object::New(Isolate::GetCurrent());
+
+    std::string suffix = ".node";
+    if (module_path.size() >= suffix.size() &&
+        module_path.compare(module_path.size() - suffix.size(), suffix.size(), suffix) != 0)
+    {
+        module_path += suffix;
+    }
 
     auto module = dlopen(module_path.c_str(), RTLD_LAZY);
     if (!module)
@@ -48,8 +55,7 @@ void run_script(Isolate* isolate, std::string const& source, std::string const& 
     Context::Scope context_scope(context);
 
     // Compile the script.
-    Local<Script> script = Script::Compile(v8cpp::to_v8(isolate, source),
-                                           v8cpp::to_v8(isolate, filename));
+    Local<Script> script = Script::Compile(v8cpp::to_v8(isolate, source), v8cpp::to_v8(isolate, filename));
 
     // Run the script.
     if (script.IsEmpty())
