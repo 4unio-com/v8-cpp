@@ -11,47 +11,67 @@ using InitFunc = void(Handle<Object> exports);
 
 Local<Object> require(std::string const& module_path)
 {
+    Local<Object> exports = Object::New(Isolate::GetCurrent());
+
     auto module = dlopen(module_path.c_str(), RTLD_LAZY);
     if (!module)
     {
         std::cerr << "dlopen failed: " << dlerror() << std::endl;
-    };
+        return exports;
+    }
+
     auto init_module = (InitFunc*)dlsym(module, "init_module");
     if (!init_module)
     {
         std::cerr << "dlsym failed: " << dlerror() << std::endl;
-    };
+        return exports;
+    }
 
-    Local<Object> exports = Object::New(Isolate::GetCurrent());
     init_module(exports);
     return exports;
 }
 
-v8::Handle<v8::Value> run_script(Isolate* isolate, std::string const& source, std::string const& filename)
+void run_script(Isolate* isolate, std::string const& source, std::string const& filename)
 {
-    v8::EscapableHandleScope scope(isolate);
+    // Create an isolate scope.
+    Isolate::Scope isolate_scope(isolate);
 
-    v8::Local<v8::Script> script = v8::Script::Compile(v8cpp::to_v8(isolate, source),
-                                                       v8cpp::to_v8(isolate, filename));
+    // Create a stack-allocated handle scope.
+    HandleScope handle_scope(isolate);
 
-    v8::Local<v8::Value> result;
-    if (!script.IsEmpty())
+    // Create a new context that supports "require()".
+    v8cpp::Module module(isolate);
+    module.add_function("require", &require);
+    Local<Context> context = Context::New(isolate, nullptr, module.object_template());
+
+    // Enter the context for compiling and running the script.
+    Context::Scope context_scope(context);
+
+    // Compile the script.
+    Local<Script> script = Script::Compile(v8cpp::to_v8(isolate, source),
+                                           v8cpp::to_v8(isolate, filename));
+
+    // Run the script.
+    if (script.IsEmpty())
     {
-        result = script->Run();
+        std::cerr << "run_script(): Failed to compile script file: \"" << filename << "\"" << std::endl;
+        return;
     }
-    return scope.Escape(result);
+
+    script->Run();
 }
 
-v8::Handle<v8::Value> run_script_file(Isolate* isolate, std::string const& filename)
+void run_script_file(Isolate* isolate, std::string const& filename)
 {
     std::ifstream stream(filename.c_str());
     if (!stream)
     {
-        throw std::runtime_error("run_script_file(): Failed to locate file: \"" + filename + "\"");
+        std::cerr << "run_script_file(): Failed to locate script file: \"" << filename << "\"" << std::endl;
+        return;
     }
 
     std::istreambuf_iterator<char> begin(stream), end;
-    return run_script(isolate, std::string(begin, end), filename);
+    run_script(isolate, std::string(begin, end), filename);
 }
 
 int main(int argc, char* argv[])
@@ -68,26 +88,15 @@ int main(int argc, char* argv[])
 
     // Create a new Isolate and make it the current one.
     Isolate* isolate = Isolate::New();
-    {
-        Isolate::Scope isolate_scope(isolate);
 
-        // Create a stack-allocated handle scope.
-        HandleScope handle_scope(isolate);
-
-        // Create a new context.
-        v8cpp::Module module(isolate);
-        module.add_function("require", &require);
-        Local<Context> context = Context::New(isolate, nullptr, module.object_template());
-
-        // Enter the context for compiling and running the hello world script.
-        Context::Scope context_scope(context);
-
-        // Run script.
-        run_script_file(isolate, argv[1]);
-    }
+    // Run script.
+    run_script_file(isolate, argv[1]);
 
     // Dispose the isolate and tear down V8.
     isolate->Dispose();
+
+    // Dispose V8.
     V8::Dispose();
+
     return 0;
 }
