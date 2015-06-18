@@ -83,20 +83,11 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Initialize V8.
-    V8::Initialize();
-
-    // Create a new Isolate and make it the current one.
+    // Create a new isolate to run our script in.
     Isolate* isolate = Isolate::New();
 
     // Run script.
     run_script_file(isolate, argv[1]);
-
-    // Dispose the isolate and tear down V8.
-    isolate->Dispose();
-
-    // Dispose V8.
-    V8::Dispose();
 
     return 0;
 }
