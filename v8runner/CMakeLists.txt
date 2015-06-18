@@ -7,7 +7,7 @@ add_definitions(
     -fno-permissive
     -pedantic
     -Wall
-#    -Wextra
+    -Wextra
     -fPIC
 )
 
@@ -15,7 +15,7 @@ add_definitions(
 add_custom_target(deps COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/build-deps.sh)
 
 include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/include
 )
 link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/out/native/obj.target/tools/gyp

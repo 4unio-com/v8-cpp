@@ -1,4 +1,4 @@
-#include "include/v8.h"
+#include <v8-cpp.h>
 
 #include <dlfcn.h>
 
@@ -8,9 +8,9 @@ extern "C" void node_module_register(void*) {}
 
 using InitFunc = void(Handle<Object> exports);
 
-int main(int argc, char* argv[])
+Local<Object> require(std::string const& module)
 {
-    auto handle = dlopen("/home/marcustomlinson/Projects/work/v8-cpp/v8runner-build/test/v8-cpp-test.node", RTLD_LAZY);
+    auto handle = dlopen(module.c_str(), RTLD_LAZY);
     if (!handle)
     {
         fprintf(stderr, "dlopen failed: %s\n", dlerror());
@@ -21,6 +21,13 @@ int main(int argc, char* argv[])
         fprintf(stderr, "dlsym failed: %s\n", dlerror());
     };
 
+    Local<Object> exports = Object::New(Isolate::GetCurrent());
+    sym(exports);
+    return exports;
+}
+
+int main(int argc, char* argv[])
+{
     // Initialize V8.
     V8::Initialize();
 
@@ -33,29 +40,44 @@ int main(int argc, char* argv[])
         HandleScope handle_scope(isolate);
 
         // Create a new context.
-        Local<Context> context = Context::New(isolate);
+        v8cpp::Module module(isolate);
+        module.add_function("require", &require);
+        Local<Context> context = Context::New(isolate, nullptr, module.object_template());
 
         // Enter the context for compiling and running the hello world script.
         Context::Scope context_scope(context);
 
-        Local<Object> exports = Object::New(isolate);
-        sym(exports);
-
         // Create a string containing the JavaScript source code.
         Local<String> source = String::NewFromUtf8(isolate,
         R"(
-            "hello world"
+            var addon = require("/home/marcustomlinson/Projects/work/v8-cpp/v8runner-build/test/v8-cpp-test.node");
+
+            var obj = addon.new_MyObject2(10, 0);
+
+            obj.base_method(); // hello!
+            addon.MyObject2.static_method(); // static hello!
+
+            var s = addon.new_SearchHandler(function(search_string)
+            {
+                obj.base_method();
+            });
+
+            s.listen(); // hello!
+
+            var struct = new addon.MyStruct();
+            struct.bool_value = true;
+            struct.int_value = 10;
+            struct.string_value = "world";
+            struct.output(); // world
+
+            delete struct
         )");
 
         // Compile the source code.
         Local<Script> script = Script::Compile(source);
 
-        // Run the script to get the result.
-        Local<Value> result = script->Run();
-
-        // Convert the result to an UTF8 string and print it.
-        String::Utf8Value utf8(result);
-        printf("%s\n", *utf8);
+        // Run the script.
+        script->Run();
     }
 
     // Dispose the isolate and tear down V8.
