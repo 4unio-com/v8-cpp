@@ -63,4 +63,17 @@ private:
     v8::Handle<v8::ObjectTemplate> object_;
 };
 
+// Create a V8-cpp module by exposing it's init function
+#define V8CPP_MODULE(module_name, init_func)                                    \
+extern "C"                                                                      \
+{                                                                               \
+    namespace v8cpp                                                             \
+    {                                                                           \
+        void init_module(Handle<Object> exports)                                \
+        {                                                                       \
+            init_func(exports);                                                 \
+        }                                                                       \
+    }                                                                           \
+}
+
 }  // namespace v8cpp

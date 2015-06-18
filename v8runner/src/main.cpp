@@ -1,45 +1,60 @@
 #include "include/v8.h"
 
+#include <dlfcn.h>
+
 using namespace v8;
+
+extern "C" void node_module_register(void*) {}
 
 int main(int argc, char* argv[])
 {
-  // Initialize V8.
-  V8::Initialize();
+    auto handle = dlopen("/home/marcustomlinson/Projects/work/v8-cpp/v8runner-build/test/v8-cpp-test.node", RTLD_LAZY);
+    if (!handle)
+    {
+        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+    };
+    void* sym = dlsym(handle, "init_module");
+    if (!sym)
+    {
+        fprintf(stderr, "dlsym failed: %s\n", dlerror());
+    };
 
-  // Create a new Isolate and make it the current one.
-  Isolate* isolate = Isolate::New();
-  {
-    Isolate::Scope isolate_scope(isolate);
+    // Initialize V8.
+    V8::Initialize();
 
-    // Create a stack-allocated handle scope.
-    HandleScope handle_scope(isolate);
+    // Create a new Isolate and make it the current one.
+    Isolate* isolate = Isolate::New();
+    {
+        Isolate::Scope isolate_scope(isolate);
 
-    // Create a new context.
-    Local<Context> context = Context::New(isolate);
+        // Create a stack-allocated handle scope.
+        HandleScope handle_scope(isolate);
 
-    // Enter the context for compiling and running the hello world script.
-    Context::Scope context_scope(context);
+        // Create a new context.
+        Local<Context> context = Context::New(isolate);
 
-    // Create a string containing the JavaScript source code.
-    Local<String> source = String::NewFromUtf8(isolate,
-    R"(
-        "hello world"
-    )");
+        // Enter the context for compiling and running the hello world script.
+        Context::Scope context_scope(context);
 
-    // Compile the source code.
-    Local<Script> script = Script::Compile(source);
+        // Create a string containing the JavaScript source code.
+        Local<String> source = String::NewFromUtf8(isolate,
+                                                   R"(
+                                                   "hello world"
+                                                   )");
 
-    // Run the script to get the result.
-    Local<Value> result = script->Run();
+                // Compile the source code.
+                Local<Script> script = Script::Compile(source);
 
-    // Convert the result to an UTF8 string and print it.
-    String::Utf8Value utf8(result);
-    printf("%s\n", *utf8);
-  }
+        // Run the script to get the result.
+        Local<Value> result = script->Run();
 
-  // Dispose the isolate and tear down V8.
-  isolate->Dispose();
-  V8::Dispose();
-  return 0;
+        // Convert the result to an UTF8 string and print it.
+        String::Utf8Value utf8(result);
+        printf("%s\n", *utf8);
+    }
+
+    // Dispose the isolate and tear down V8.
+    isolate->Dispose();
+    V8::Dispose();
+    return 0;
 }
