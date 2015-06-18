@@ -13,10 +13,7 @@ add_definitions(
     -fPIC
 )
 
-find_package(Node REQUIRED)
-
 include_directories(
-    ${NODE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 

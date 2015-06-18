@@ -1,3 +1,9 @@
+find_package(Node REQUIRED)
+
+include_directories(
+    ${NODE_INCLUDE_DIRS}
+)
+
 file(
     GLOB
     TEST_FILES

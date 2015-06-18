@@ -6,6 +6,8 @@ using namespace v8;
 
 extern "C" void node_module_register(void*) {}
 
+using InitFunc = void(Handle<Object> exports);
+
 int main(int argc, char* argv[])
 {
     auto handle = dlopen("/home/marcustomlinson/Projects/work/v8-cpp/v8runner-build/test/v8-cpp-test.node", RTLD_LAZY);
@@ -13,7 +15,7 @@ int main(int argc, char* argv[])
     {
         fprintf(stderr, "dlopen failed: %s\n", dlerror());
     };
-    void* sym = dlsym(handle, "init_module");
+    auto sym = (InitFunc*)dlsym(handle, "init_module");
     if (!sym)
     {
         fprintf(stderr, "dlsym failed: %s\n", dlerror());
@@ -36,14 +38,17 @@ int main(int argc, char* argv[])
         // Enter the context for compiling and running the hello world script.
         Context::Scope context_scope(context);
 
+        Local<Object> exports = Object::New(isolate);
+        sym(exports);
+
         // Create a string containing the JavaScript source code.
         Local<String> source = String::NewFromUtf8(isolate,
-                                                   R"(
-                                                   "hello world"
-                                                   )");
+        R"(
+            "hello world"
+        )");
 
-                // Compile the source code.
-                Local<Script> script = Script::Compile(source);
+        // Compile the source code.
+        Local<Script> script = Script::Compile(source);
 
         // Run the script to get the result.
         Local<Value> result = script->Run();

@@ -4,7 +4,7 @@ DIR=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 
 cd $DIR
 git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git
-git clone --depth 1 --branch 4.3.61.23 https://chromium.googlesource.com/v8/v8.git
+git clone --depth 1 --branch 3.28.73 https://chromium.googlesource.com/v8/v8.git
 
 export PATH=./depot_tools:"$PATH"
 gclient config --spec 'solutions = [
