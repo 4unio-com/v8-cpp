@@ -3,7 +3,10 @@ file(
     SRC_FILES
     *.h
     *.cpp
+    *.js
 )
+
+configure_file(test.js test.js)
 
 add_executable(
     v8runner

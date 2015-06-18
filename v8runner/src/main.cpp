@@ -1,33 +1,68 @@
 #include <v8-cpp.h>
 
 #include <dlfcn.h>
+#include <fstream>
+#include <iostream>
 
 using namespace v8;
 
 extern "C" void node_module_register(void*) {}
-
 using InitFunc = void(Handle<Object> exports);
 
-Local<Object> require(std::string const& module)
+Local<Object> require(std::string const& module_path)
 {
-    auto handle = dlopen(module.c_str(), RTLD_LAZY);
-    if (!handle)
+    auto module = dlopen(module_path.c_str(), RTLD_LAZY);
+    if (!module)
     {
-        fprintf(stderr, "dlopen failed: %s\n", dlerror());
+        std::cerr << "dlopen failed: " << dlerror() << std::endl;
     };
-    auto sym = (InitFunc*)dlsym(handle, "init_module");
-    if (!sym)
+    auto init_module = (InitFunc*)dlsym(module, "init_module");
+    if (!init_module)
     {
-        fprintf(stderr, "dlsym failed: %s\n", dlerror());
+        std::cerr << "dlsym failed: " << dlerror() << std::endl;
     };
 
     Local<Object> exports = Object::New(Isolate::GetCurrent());
-    sym(exports);
+    init_module(exports);
     return exports;
+}
+
+v8::Handle<v8::Value> run_script(Isolate* isolate, std::string const& source, std::string const& filename)
+{
+    v8::EscapableHandleScope scope(isolate);
+
+    v8::Local<v8::Script> script = v8::Script::Compile(v8cpp::to_v8(isolate, source),
+                                                       v8cpp::to_v8(isolate, filename));
+
+    v8::Local<v8::Value> result;
+    if (!script.IsEmpty())
+    {
+        result = script->Run();
+    }
+    return scope.Escape(result);
+}
+
+v8::Handle<v8::Value> run_script_file(Isolate* isolate, std::string const& filename)
+{
+    std::ifstream stream(filename.c_str());
+    if (!stream)
+    {
+        throw std::runtime_error("run_script_file(): Failed to locate file: \"" + filename + "\"");
+    }
+
+    std::istreambuf_iterator<char> begin(stream), end;
+    return run_script(isolate, std::string(begin, end), filename);
 }
 
 int main(int argc, char* argv[])
 {
+    // Check args.
+    if (argc != 2)
+    {
+        std::cerr << "usage: v8runner script.js" << std::endl;
+        return -1;
+    }
+
     // Initialize V8.
     V8::Initialize();
 
@@ -47,37 +82,8 @@ int main(int argc, char* argv[])
         // Enter the context for compiling and running the hello world script.
         Context::Scope context_scope(context);
 
-        // Create a string containing the JavaScript source code.
-        Local<String> source = String::NewFromUtf8(isolate,
-        R"(
-            var addon = require("/home/marcustomlinson/Projects/work/v8-cpp/v8runner-build/test/v8-cpp-test.node");
-
-            var obj = addon.new_MyObject2(10, 0);
-
-            obj.base_method(); // hello!
-            addon.MyObject2.static_method(); // static hello!
-
-            var s = addon.new_SearchHandler(function(search_string)
-            {
-                obj.base_method();
-            });
-
-            s.listen(); // hello!
-
-            var struct = new addon.MyStruct();
-            struct.bool_value = true;
-            struct.int_value = 10;
-            struct.string_value = "world";
-            struct.output(); // world
-
-            delete struct
-        )");
-
-        // Compile the source code.
-        Local<Script> script = Script::Compile(source);
-
-        // Run the script.
-        script->Run();
+        // Run script.
+        run_script_file(isolate, argv[1]);
     }
 
     // Dispose the isolate and tear down V8.
