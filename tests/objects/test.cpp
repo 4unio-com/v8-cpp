@@ -28,5 +28,9 @@ TEST(Test, basic)
 {
     v8::Isolate* isolate = v8::Isolate::New();
 
-    v8cpp::run_script(isolate, "hello");
+    v8cpp::run_script(isolate,
+    R"(
+        var module = require("./module/test-objects-module");
+        var x = new module.TestClass(2);
+    )");
 }
