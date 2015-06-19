@@ -1,14 +1,6 @@
-file(
-    GLOB
-    SRC_FILES
-    *.h
-    *.cpp
-    *.js
-)
-
 add_executable(
     v8runner
-    ${SRC_FILES}
+    v8runner.cpp
 )
 
 target_link_libraries(
