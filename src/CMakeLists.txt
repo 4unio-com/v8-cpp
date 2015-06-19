@@ -6,6 +6,6 @@ file(
 
 # this allows us to see our source files in QtCreator
 add_custom_target(
-  source_files
-  SOURCES ${SRC_FILES}
+    source_files
+    SOURCES ${SRC_FILES}
 )

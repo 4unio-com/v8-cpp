@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <v8-cpp.h>
+
 // OBJECTS
 // construct class via new() from JS
 // construct class via factory methods from JS (constructor overloads)
@@ -24,4 +26,7 @@
 
 TEST(Test, basic)
 {
+    v8::Isolate* isolate = v8::Isolate::New();
+
+    v8cpp::run_script(isolate, "hello");
 }

@@ -6,5 +6,5 @@ include_directories(
   ${TEST_INCLUDE_DIRS}
 )
 
-add_subdirectory(unit)
+add_subdirectory(objects)
 
