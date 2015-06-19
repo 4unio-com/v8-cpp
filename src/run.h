@@ -25,7 +25,8 @@
 namespace v8cpp
 {
 
-inline void run_script(v8::Isolate* isolate, std::string const& source, std::string const& filename = "")
+template<typename T = v8::Handle<v8::Value>>
+T run_script(v8::Isolate* isolate, std::string const& source, std::string const& filename = "")
 {
     // Create an isolate scope.
     v8::Isolate::Scope isolate_scope(isolate);
@@ -55,23 +56,24 @@ inline void run_script(v8::Isolate* isolate, std::string const& source, std::str
         {
             std::cerr << "run_script(): Failed to compile script." << std::endl;
         }
-        return;
+        return T();
     }
 
-    script->Run();
+    return v8cpp::from_v8<T>(isolate, script->Run());
 }
 
-inline void run_script_file(v8::Isolate* isolate, std::string const& filename)
+template<typename T = v8::Handle<v8::Value>>
+T run_script_file(v8::Isolate* isolate, std::string const& filename)
 {
     std::ifstream stream(filename.c_str());
     if (!stream)
     {
         std::cerr << "run_script_file(): Failed to locate script file: \"" << filename << "\"" << std::endl;
-        return;
+        return T();
     }
 
     std::istreambuf_iterator<char> begin(stream), end;
-    run_script(isolate, std::string(begin, end), filename);
+    return run_script<T>(isolate, std::string(begin, end), filename);
 }
 
 }
