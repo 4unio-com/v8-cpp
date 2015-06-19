@@ -13,8 +13,15 @@ add_definitions(
     -fPIC
 )
 
+# make deps - Download and build dependencies
+add_custom_target(deps COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/build-deps.sh)
+
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/include
+)
+link_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/out/native/obj.target/tools/gyp
 )
 
 add_subdirectory(src)

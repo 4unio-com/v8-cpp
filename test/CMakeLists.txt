@@ -7,9 +7,7 @@ include_directories(
 file(
     GLOB
     TEST_FILES
-    *.h
-    *.cpp
-    *.js
+    *.h *.cpp *.js
 )
 
 configure_file(test.js test.js)
