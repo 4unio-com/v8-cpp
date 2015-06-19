@@ -1,6 +1,6 @@
 #include <v8-cpp.h>
 
-#include <iostream>
+#include <gtest/gtest.h>
 
 using namespace v8;
 
@@ -9,7 +9,7 @@ class TestClass
 public:
     TestClass(int i)
     {
-        std::cout << i << std::endl;
+        EXPECT_EQ(i, 2);
     }
 };
 

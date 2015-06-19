@@ -24,13 +24,13 @@
 // call JS function from C++ (callback)
 // call C++ functions from JS
 
-TEST(Test, basic)
+TEST(Test, construct_class_via_new)
 {
     v8::Isolate* isolate = v8::Isolate::New();
 
     v8cpp::run_script(isolate,
     R"(
-        var module = require("./module/test-objects-module");
+        var module = require("./module");
         var x = new module.TestClass(2);
     )");
 }

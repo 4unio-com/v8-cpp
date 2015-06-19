@@ -1,3 +1,18 @@
+# MODULE
+add_library(
+    module SHARED
+    module.cpp
+)
+
+# This line sets the output binary name to "<target_name>.node"
+set_target_properties(
+    module
+    PROPERTIES
+    PREFIX ""
+    SUFFIX ".node"
+)
+
+# TEST
 add_executable(
     test-objects
     test.cpp
@@ -22,5 +37,3 @@ add_test(
     test-objects
     test-objects
 )
-
-add_subdirectory(module)
