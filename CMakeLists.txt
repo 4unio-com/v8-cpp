@@ -13,15 +13,13 @@ add_definitions(
     -fPIC
 )
 
-find_package(Node REQUIRED)
-
 include_directories(
-    ${NODE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(v8runner)
 
 enable_testing()
 add_subdirectory(tests)
