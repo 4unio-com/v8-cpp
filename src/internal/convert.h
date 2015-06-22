@@ -489,7 +489,7 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
 
     static ToType to_v8(v8::Isolate* isolate, T const* value)
     {
-        return Class<ClassType>::find_object(isolate, value);
+        return Class<ClassType>::instance(isolate).export_object(const_cast<T*>(value));
     }
 };
 
