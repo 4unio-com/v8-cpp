@@ -1,17 +1,8 @@
+#include "test.h"
+
 #include <v8-cpp.h>
 
-#include <gtest/gtest.h>
-
 using namespace v8;
-
-class TestClass
-{
-public:
-    TestClass(int i)
-    {
-        EXPECT_EQ(i, 2);
-    }
-};
 
 void InitAll(Handle<Object> exports)
 {

@@ -50,13 +50,12 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
     {
         if (!filename.empty())
         {
-            std::cerr << "run_script(): Failed to compile script file: \"" << filename << "\"" << std::endl;
+            throw std::runtime_error("run_script(): Failed to compile script file: \"" + filename + "\"");
         }
         else
         {
-            std::cerr << "run_script(): Failed to compile script." << std::endl;
+            throw std::runtime_error("run_script(): Failed to compile script.");
         }
-        return T();
     }
 
     return v8cpp::from_v8<T>(isolate, script->Run());
@@ -68,8 +67,7 @@ T run_script_file(v8::Isolate* isolate, std::string const& filename)
     std::ifstream stream(filename.c_str());
     if (!stream)
     {
-        std::cerr << "run_script_file(): Failed to locate script file: \"" << filename << "\"" << std::endl;
-        return T();
+        throw std::runtime_error("run_script_file(): Failed to locate script file: \"" + filename + "\"");
     }
 
     std::istreambuf_iterator<char> begin(stream), end;

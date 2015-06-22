@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
+#include "test.h"
 
 #include <v8-cpp.h>
+
+#include <gtest/gtest.h>
 
 // OBJECTS
 // construct class via new() from JS
@@ -28,9 +30,12 @@ TEST(Test, construct_class_via_new)
 {
     v8::Isolate* isolate = v8::Isolate::New();
 
-    v8cpp::run_script(isolate,
+    auto test_object = v8cpp::run_script<TestClass>(isolate,
     R"(
         var module = require("./module");
-        var x = new module.TestClass(2);
+        var test_object = new module.TestClass(73645);
+        test_object;
     )");
+
+    EXPECT_EQ(test_object.i_, 73645);
 }

@@ -15,6 +15,7 @@ set_target_properties(
 # TEST
 add_executable(
     test-objects
+    test.h
     test.cpp
 )
 
