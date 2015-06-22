@@ -46,33 +46,27 @@ private:
     Persistent<Function> cb_;
 };
 
-Handle<Object> new_MyObject(FunctionCallbackInfo<Value> const& args)
+MyObject* new_MyObject(FunctionCallbackInfo<Value> const& args)
 {
-    MyObject* obj = nullptr;
     if (args.Length() == 1 && args[0]->IsNumber())
     {
-        obj = new MyObject(v8cpp::from_v8<double>(Isolate::GetCurrent(), args[0]));
+        return new MyObject(v8cpp::from_v8<double>(Isolate::GetCurrent(), args[0]));
     }
     else if (args.Length() == 1 && args[0]->IsString())
     {
-        obj = new MyObject(v8cpp::from_v8<std::string const&>(Isolate::GetCurrent(), args[0]));
+        return new MyObject(v8cpp::from_v8<std::string const&>(Isolate::GetCurrent(), args[0]));
     }
-    return v8cpp::export_object<MyObject>(Isolate::GetCurrent(), obj);
+    return nullptr;
 }
 
-Handle<Object> new_MyObject2(double value, int value2)
+MyObject2_OL* new_MyObject2(double value, int value2)
 {
-    MyObject2_OL* obj = new MyObject2_OL(value, value2);
-    return v8cpp::export_object<MyObject2_OL>(Isolate::GetCurrent(), obj);
+    return new MyObject2_OL(value, value2);
 }
 
-Handle<Object> new_SearchHandler(Local<Function> const& cb)
+SearchHandler* new_SearchHandler(Local<Function> const& cb)
 {
-    SearchHandler* obj = new SearchHandler(cb);
-    auto x = v8cpp::export_object<SearchHandler>(Isolate::GetCurrent(), obj);
-    auto y = v8cpp::import_object<SearchHandler>(Isolate::GetCurrent(), x);
-    assert(y == obj);
-    return x;
+    return new SearchHandler(cb);
 }
 
 void InitAll(Handle<Object> exports)

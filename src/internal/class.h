@@ -96,14 +96,25 @@ public:
         proto_template()->Inherit(base_class->class_template());
     }
 
-    v8::Handle<v8::Object> export_object_reference(T* object)
-    {
-        return export_object_(object, false);
-    }
-
     v8::Handle<v8::Object> export_object(T* object)
     {
-        return export_object_(object, true);
+        v8::EscapableHandleScope scope(isolate_);
+
+        v8::Local<v8::Object> v8_object = class_template()->GetFunction()->NewInstance();
+        v8_object->SetAlignedPointerInInternalField(0, object);
+        v8_object->SetAlignedPointerInInternalField(1, this);
+
+        MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
+        v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
+                            {
+                                v8::Isolate* isolate = data.GetIsolate();
+                                T* object = data.GetParameter();
+                                instance(isolate).destroy_object(object);
+                            });
+
+        ClassInfo::add_object(object, std::move(v8_object_p));
+
+        return scope.Escape(v8_object);
     }
 
     v8::Handle<v8::Object> export_object(v8::FunctionCallbackInfo<v8::Value> const& args)
@@ -196,39 +207,6 @@ private:
     {
         static size_t my_type = ClassInfo::register_class();
         return my_type;
-    }
-
-    v8::Handle<v8::Object> export_object_(T* object, bool destroy_after)
-    {
-        v8::EscapableHandleScope scope(isolate_);
-
-        v8::Local<v8::Object> v8_object = class_template()->GetFunction()->NewInstance();
-        v8_object->SetAlignedPointerInInternalField(0, object);
-        v8_object->SetAlignedPointerInInternalField(1, this);
-
-        MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
-        if (destroy_after)
-        {
-            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                                {
-                                    v8::Isolate* isolate = data.GetIsolate();
-                                    T* object = data.GetParameter();
-                                    instance(isolate).destroy_object(object);
-                                });
-        }
-        else
-        {
-            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                                {
-                                    v8::Isolate* isolate = data.GetIsolate();
-                                    T* object = data.GetParameter();
-                                    instance(isolate).remove_object<T>(isolate, object, nullptr);
-                                });
-        }
-
-        ClassInfo::add_object(object, std::move(v8_object_p));
-
-        return scope.Escape(v8_object);
     }
 
     v8::Isolate* isolate_;
