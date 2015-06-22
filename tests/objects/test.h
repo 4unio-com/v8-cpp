@@ -5,10 +5,11 @@
 class TestClass
 {
 public:
-    TestClass(int i)
+    TestClass(int a, int b)
     {
-        EXPECT_EQ(i, 73645);
-        i_ = i;
+        EXPECT_EQ(a, 1);
+        EXPECT_EQ(b, 2);
+        i_ = a + b;
     }
 
     int i_;

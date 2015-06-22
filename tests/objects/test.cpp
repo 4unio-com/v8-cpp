@@ -33,9 +33,23 @@ TEST(Test, construct_class_via_new)
     auto test_object = v8cpp::run_script<TestClass>(isolate,
     R"(
         var module = require("./module");
-        var test_object = new module.TestClass(73645);
+        var test_object = new module.TestClass(1, 2);
         test_object;
     )");
 
-    EXPECT_EQ(test_object.i_, 73645);
+    EXPECT_EQ(test_object.i_, 3);
+}
+
+TEST(Test, construct_class_via_factory)
+{
+    v8::Isolate* isolate = v8::Isolate::New();
+
+    auto test_object = v8cpp::run_script<TestClass>(isolate,
+    R"(
+        var module = require("./module");
+        var test_object = module.new_TestClass(1, 2);
+        test_object;
+    )");
+
+    EXPECT_EQ(test_object.i_, 3);
 }

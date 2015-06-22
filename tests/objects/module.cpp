@@ -4,6 +4,12 @@
 
 using namespace v8;
 
+Handle<Object> new_TestClass(int a, int b)
+{
+    TestClass* obj = new TestClass(a, b);
+    return v8cpp::export_object<TestClass>(Isolate::GetCurrent(), obj);
+}
+
 void InitAll(Handle<Object> exports)
 {
     // Get current isolate
@@ -12,12 +18,13 @@ void InitAll(Handle<Object> exports)
     // Prepare class binding
     v8cpp::Class<TestClass> testclass(isolate);
     testclass
-            .set_constructor<int>();
+            .set_constructor<int, int>();
 
     // Prepare module
     v8cpp::Module module(isolate);
 
     module.add_class("TestClass", testclass);
+    module.add_function("new_TestClass", &new_TestClass);
 
     exports->SetPrototype(module.create_prototype());
 }
