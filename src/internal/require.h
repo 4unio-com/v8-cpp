@@ -26,35 +26,76 @@ namespace v8cpp
 namespace internal
 {
 
-extern "C" void node_module_register(void*) {}
 using InitFunc = void(v8::Handle<v8::Object> exports);
+InitFunc* node_init_func;
 
-inline v8::Local<v8::Object> require(std::string module_path)
+struct NodeModule
 {
+  int nm_version;
+  unsigned int nm_flags;
+  void* nm_dso_handle;
+  const char* nm_filename;
+  InitFunc* nm_register_func;
+  //...
+};
+
+extern "C" void node_module_register(void* m)
+{
+    auto mp = static_cast<NodeModule*>(m);
+
+    // For now we only know that version 14 works here
+    if (mp->nm_version == 14)
+    {
+        node_init_func = mp->nm_register_func;
+    }
+    else
+    {
+        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version
+                  << " not supported" << std::endl;
+    }
+}
+
+inline v8::Local<v8::Object> require(std::string const& module_path)
+{
+    node_init_func = nullptr;
     v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
 
-    std::string suffix = ".node";
-    if (module_path.size() >= suffix.size() &&
-        module_path.compare(module_path.size() - suffix.size(), suffix.size(), suffix) != 0)
-    {
-        module_path += suffix;
-    }
-
-    auto module = dlopen(module_path.c_str(), RTLD_LAZY);
+    // Try append ".node" to module_path
+    std::string suffixed_module_path = module_path + ".node";
+    auto module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
     if (!module)
     {
-        std::cerr << "dlopen failed: " << dlerror() << std::endl;
-        return exports;
+        // Didn't work, now try append ".so" to module_path
+        suffixed_module_path = module_path + ".so";
+        module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
+        if (!module)
+        {
+            // Still didn't work, just try module_path as is
+            module = dlopen(module_path.c_str(), RTLD_LAZY);
+            if (!module)
+            {
+                std::cerr << "dlopen failed: " << dlerror() << std::endl;
+                return exports;
+            }
+        }
     }
 
-    auto init_module = (InitFunc*)dlsym(module, "init_module");
-    if (!init_module)
+    if (node_init_func)
     {
-        std::cerr << "dlsym failed: " << dlerror() << std::endl;
-        return exports;
+        node_init_func(exports);
+    }
+    else
+    {
+        auto v8cpp_init_func = (InitFunc*)dlsym(module, "init_module");
+        if (!v8cpp_init_func)
+        {
+            std::cerr << "dlsym failed: " << dlerror() << std::endl;
+            return exports;
+        }
+
+        v8cpp_init_func(exports);
     }
 
-    init_module(exports);
     return exports;
 }
 
