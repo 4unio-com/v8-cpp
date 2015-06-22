@@ -55,24 +55,29 @@ extern "C" void node_module_register(void* m)
     }
 }
 
-inline v8::Local<v8::Object> require(std::string module_path)
+inline v8::Local<v8::Object> require(std::string const& module_path)
 {
+    node_init_func = nullptr;
     v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
 
-    std::string suffix = ".node";
-    if (module_path.size() >= suffix.size() &&
-        module_path.compare(module_path.size() - suffix.size(), suffix.size(), suffix) != 0)
-    {
-        module_path += suffix;
-    }
-
-    node_init_func = nullptr;
-
-    auto module = dlopen(module_path.c_str(), RTLD_LAZY);
+    // Try append ".node" to module_path
+    std::string suffixed_module_path = module_path + ".node";
+    auto module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
     if (!module)
     {
-        std::cerr << "dlopen failed: " << dlerror() << std::endl;
-        return exports;
+        // Didn't work, now try append ".so" to module_path
+        suffixed_module_path = module_path + ".so";
+        module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
+        if (!module)
+        {
+            // Still didn't work, just try module_path as is
+            module = dlopen(module_path.c_str(), RTLD_LAZY);
+            if (!module)
+            {
+                std::cerr << "dlopen failed: " << dlerror() << std::endl;
+                return exports;
+            }
+        }
     }
 
     if (node_init_func)
