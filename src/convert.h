@@ -81,27 +81,4 @@ v8::Local<T> to_local(v8::Isolate* isolate, v8::PersistentBase<T> const& handle)
     }
 }
 
-// Create a JS object from a C++ object
-// JS WILL take ownership of the C++ pointer, the pointer will be deleted from JS
-template <typename T>
-static v8::Handle<v8::Object> export_object(v8::Isolate* isolate, T* ext)
-{
-    return internal::Class<T>::instance(isolate).export_object(ext);
-}
-
-// Create a JS object that references a C++ object
-// JS WILL NOT take ownership of the C++ pointer, the pointer must be deleted from C++
-template <typename T>
-static v8::Handle<v8::Object> export_object_reference(v8::Isolate* isolate, T* ext)
-{
-    return internal::Class<T>::instance(isolate).export_object_reference(ext);
-}
-
-// Get C++ object from V8 (returns nullptr on failure)
-template <typename T>
-static T* import_object(v8::Isolate* isolate, v8::Handle<v8::Value> value)
-{
-    return internal::Class<T>::instance(isolate).import_object(value);
-}
-
 }  // namespace v8cpp
