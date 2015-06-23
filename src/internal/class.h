@@ -117,6 +117,11 @@ public:
         return scope.Escape(v8_object);
     }
 
+    v8::Handle<v8::Object> export_object(T const* object)
+    {
+        return export_object(const_cast<T*>(object));
+    }
+
     v8::Handle<v8::Object> export_object(v8::FunctionCallbackInfo<v8::Value> const& args)
     {
         return constructor_ ? export_object(constructor_(args)) :
