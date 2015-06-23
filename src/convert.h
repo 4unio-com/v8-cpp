@@ -55,6 +55,11 @@ typename internal::Convert<T>::ToType to_v8(v8::Isolate* isolate, T const& value
     return internal::Convert<T>::to_v8(isolate, value);
 }
 
+v8::Handle<v8::Value> to_v8(v8::Isolate* isolate, std::nullptr_t)
+{
+    return v8::Null(isolate);
+}
+
 template <typename I>
 v8::Handle<v8::Array> to_v8(v8::Isolate* isolate, I begin, I end)
 {
