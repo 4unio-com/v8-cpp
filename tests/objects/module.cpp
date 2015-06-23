@@ -4,10 +4,9 @@
 
 using namespace v8;
 
-Handle<Object> new_TestClass(int a, int b)
+TestClass* new_TestClass(int a, int b)
 {
-    TestClass* obj = new TestClass(a, b);
-    return v8cpp::export_object<TestClass>(Isolate::GetCurrent(), obj);
+    return new TestClass(a, b);
 }
 
 void InitAll(Handle<Object> exports)
