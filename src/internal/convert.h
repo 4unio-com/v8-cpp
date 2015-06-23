@@ -452,18 +452,8 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
 
     static ToType to_v8(v8::Isolate* isolate, T const& value)
     {
-        return Convert<T*>::to_v8(isolate, &value);
+        return Convert<T*>::to_v8(isolate, new T(value));
     }
-};
-
-template <typename T>
-struct Convert<T&> : Convert<T>
-{
-};
-
-template <typename T>
-struct Convert<T const&> : Convert<T>
-{
 };
 
 template <typename T>
@@ -491,6 +481,16 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
     {
         return Class<ClassType>::instance(isolate).export_object(const_cast<T*>(value));
     }
+};
+
+template <typename T>
+struct Convert<T&> : Convert<T>
+{
+};
+
+template <typename T>
+struct Convert<T const&> : Convert<T>
+{
 };
 
 }  // namespace internal
