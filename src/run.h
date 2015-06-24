@@ -58,7 +58,22 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
         }
     }
 
-    return v8cpp::from_v8<T>(isolate, script->Run());
+    auto result = v8cpp::from_v8<T>(isolate, script->Run());
+
+    // Clean up
+    using ClassInstances = std::vector<v8cpp::internal::Class<void>*>;
+    ClassInstances* instances = static_cast<ClassInstances*>(isolate->GetData(0));
+    if (instances)
+    {
+        for (auto instance : *instances)
+        {
+            delete instance;
+        }
+    }
+    delete instances;
+    isolate->SetData(0, nullptr);
+
+    return result;
 }
 
 template<typename T = v8::Handle<v8::Value>>
