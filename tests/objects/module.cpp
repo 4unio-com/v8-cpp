@@ -4,11 +4,6 @@
 
 using namespace v8;
 
-TestClass* new_TestClass(int a, int b)
-{
-    return new TestClass(a, b);
-}
-
 void InitAll(Handle<Object> exports)
 {
     // Get current isolate

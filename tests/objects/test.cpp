@@ -38,6 +38,8 @@ TEST(Test, construct_class_via_new)
     )");
 
     EXPECT_EQ(test_object.i_, 3);
+
+    isolate->Dispose();
 }
 
 TEST(Test, construct_class_via_factory)
@@ -52,4 +54,6 @@ TEST(Test, construct_class_via_factory)
     )");
 
     EXPECT_EQ(test_object.i_, 3);
+
+    isolate->Dispose();
 }

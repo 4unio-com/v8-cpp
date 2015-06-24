@@ -15,3 +15,7 @@ public:
     int i_;
 };
 
+TestClass* new_TestClass(int a, int b)
+{
+    return new TestClass(a, b);
+}
