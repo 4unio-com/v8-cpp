@@ -22,16 +22,11 @@ add_executable(
 target_link_libraries(
     test-objects
 
+    v8-cpp
+
     ${GTEST_BOTH_LIBRARIES}
     ${GMOCK_LIBRARIES}
     ${TEST_LDFLAGS}
-
-    v8_base
-    v8_libbase
-    v8_snapshot
-
-    dl
-    pthread
 )
 
 add_test(
