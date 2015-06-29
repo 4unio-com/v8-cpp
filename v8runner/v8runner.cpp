@@ -17,5 +17,8 @@ int main(int argc, char* argv[])
     // Run script.
     v8cpp::run_script_file(isolate, argv[1]);
 
+    // Clean up.
+    isolate->Dispose();
+
     return 0;
 }

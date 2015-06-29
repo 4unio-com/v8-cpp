@@ -5,11 +5,5 @@ add_executable(
 
 target_link_libraries(
     v8runner
-
-    v8_base
-    v8_libbase
-    v8_snapshot
-
-    dl
-    pthread
+    v8-cpp
 )
