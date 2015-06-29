@@ -4,8 +4,23 @@ file(
     *.h
 )
 
-# this allows us to see our source files in QtCreator
-add_custom_target(
-  source_files
-  SOURCES ${SRC_FILES}
+add_library(
+    v8-cpp SHARED
+    ${SRC_FILES}
+)
+
+set_target_properties(
+    v8-cpp PROPERTIES
+    LINKER_LANGUAGE CXX
+)
+
+target_link_libraries(
+    v8-cpp
+
+    v8_base
+    v8_libbase
+    v8_snapshot
+
+    dl
+    pthread
 )
