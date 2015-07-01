@@ -45,6 +45,12 @@ struct FunctionTraits<R (C::*)(Args...)> : FunctionTraits<R(C&, Args...)>
 {
 };
 
+// Const member function pointer
+template <typename C, typename R, typename... Args>
+struct FunctionTraits<R (C::*)(Args...) const> : FunctionTraits<R(C const&, Args...)>
+{
+};
+
 // Member object pointer
 template <typename C, typename R>
 struct FunctionTraits<R(C::*)> : FunctionTraits<R(C&)>
