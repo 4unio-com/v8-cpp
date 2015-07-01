@@ -17,7 +17,7 @@ public:
         return obj1.value_ + obj2.value_;
     }
 
-    virtual double value()
+    virtual double value() const
     {
         return value_;
     }
