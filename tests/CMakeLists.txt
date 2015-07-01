@@ -6,4 +6,7 @@ include_directories(
   ${TEST_INCLUDE_DIRS}
 )
 
+add_subdirectory(functions)
+add_subdirectory(members)
+add_subdirectory(methods)
 add_subdirectory(objects)

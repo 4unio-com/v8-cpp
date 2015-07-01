@@ -10,28 +10,13 @@
 // move/ref objects to JS
 // move/ref objects back to C++
 
-// METHODS
-// call regular class methods from JS
-// call static class methods from JS
-// call base class methods from JS (inheritance)
-// call overridden class methods from JS (inheritance)
-// call overloaded class methods from JS
-// call template methods from JS??
-
-// MEMBERS
-// get/set class/struct members from JS
-
-// FUNCTIONS
-// call JS function from C++ (callback)
-// call C++ functions from JS
-
 TEST(Test, construct_class_via_new)
 {
     v8::Isolate* isolate = v8::Isolate::New();
 
     auto test_object = v8cpp::run_script<TestClass>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = new module.TestClass(1, 2);
         test_object;
     )");
@@ -47,7 +32,7 @@ TEST(Test, construct_class_via_factory)
 
     auto test_object = v8cpp::run_script<TestClass>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         test_object;
     )");
@@ -63,7 +48,7 @@ TEST(Test, object_to_js)
 
     auto test_object = v8cpp::run_script<EmbeddedTestClass*>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         test_object.embedded_class_ptr();
     )");
@@ -72,7 +57,7 @@ TEST(Test, object_to_js)
 
     auto test_object2 = v8cpp::run_script<EmbeddedTestClass&>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         test_object.embedded_class_ref();
     )");
@@ -81,7 +66,7 @@ TEST(Test, object_to_js)
 
     auto test_object3 = v8cpp::run_script<EmbeddedTestClass>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         test_object.embedded_class_copy();
     )");
@@ -97,7 +82,7 @@ TEST(Test, object_from_js)
 
     auto test_object = v8cpp::run_script<TestClass>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         var test_object2 = module.new_TestClass(1, 2);
 
@@ -109,7 +94,7 @@ TEST(Test, object_from_js)
 
     auto result = v8cpp::run_script<int>(isolate,
     R"(
-        var module = require("./module");
+        var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         var test_object2 = module.new_TestClass(1, 2);
 

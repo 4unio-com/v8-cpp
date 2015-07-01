@@ -1,12 +1,12 @@
 # MODULE
 add_library(
-    test-objects-module SHARED
+    test-methods-module SHARED
     module.cpp
 )
 
 # This line sets the output binary name to "<target_name>.node"
 set_target_properties(
-    test-objects-module
+    test-methods-module
     PROPERTIES
     PREFIX ""
     SUFFIX ".node"
@@ -14,13 +14,13 @@ set_target_properties(
 
 # TEST
 add_executable(
-    test-objects
+    test-methods
     test.h
     test.cpp
 )
 
 target_link_libraries(
-    test-objects
+    test-methods
 
     v8-cpp
 
@@ -30,6 +30,6 @@ target_link_libraries(
 )
 
 add_test(
-    test-objects
-    test-objects
+    test-methods
+    test-methods
 )
