@@ -25,7 +25,7 @@
 namespace v8cpp
 {
 
-template<typename T = v8::Handle<v8::Value>>
+template <typename T = v8::Handle<v8::Value>>
 T run_script(v8::Isolate* isolate, std::string const& source, std::string const& filename = "")
 {
     // Create an isolate scope.
@@ -61,7 +61,7 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
     return v8cpp::from_v8<T>(isolate, script->Run());
 }
 
-template<typename T = v8::Handle<v8::Value>>
+template <typename T = v8::Handle<v8::Value>>
 T run_script_file(v8::Isolate* isolate, std::string const& filename)
 {
     std::ifstream stream(filename.c_str());
@@ -73,5 +73,4 @@ T run_script_file(v8::Isolate* isolate, std::string const& filename)
     std::istreambuf_iterator<char> begin(stream), end;
     return run_script<T>(isolate, std::string(begin, end), filename);
 }
-
 }

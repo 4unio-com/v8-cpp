@@ -31,12 +31,12 @@ InitFunc* node_init_func;
 
 struct NodeModule
 {
-  int nm_version;
-  unsigned int nm_flags;
-  void* nm_dso_handle;
-  const char* nm_filename;
-  InitFunc* nm_register_func;
-  //...
+    int nm_version;
+    unsigned int nm_flags;
+    void* nm_dso_handle;
+    const char* nm_filename;
+    InitFunc* nm_register_func;
+    //...
 };
 
 extern "C" void node_module_register(void* m)
@@ -50,8 +50,8 @@ extern "C" void node_module_register(void* m)
     }
     else
     {
-        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version
-                  << " not supported" << std::endl;
+        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
+                  << std::endl;
     }
 }
 
