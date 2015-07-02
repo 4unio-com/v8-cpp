@@ -5,7 +5,7 @@ file(
 )
 
 add_library(
-    v8-cpp SHARED
+    v8-cpp
     ${SRC_FILES}
 )
 
