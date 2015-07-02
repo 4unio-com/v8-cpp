@@ -51,6 +51,8 @@ public:
 class TestClass_OL : public TestClass
 {
 public:
+    using TestClass::TestClass;
+
     v8::Local<v8::Value> overload_method(v8::FunctionCallbackInfo<v8::Value> const& args)
     {
         if (args.Length() == 1)

@@ -6,20 +6,20 @@ include_directories(
 
 file(
     GLOB
-    TEST_FILES
+    EXAMPLE_FILES
     *.h *.cpp *.js
 )
 
-configure_file(test.js test.js)
+configure_file(example.js example.js)
 
 add_library(
-    v8-cpp-test SHARED
-    ${TEST_FILES}
+    v8-cpp-example SHARED
+    ${EXAMPLE_FILES}
 )
 
-# This line sets the output binary name to "v8-cpp-exampleX.node"
+# This line sets the output binary name to "v8-cpp-example.node"
 set_target_properties(
-    v8-cpp-test
+    v8-cpp-example
     PROPERTIES
     PREFIX ""
     SUFFIX ".node"

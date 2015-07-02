@@ -9,7 +9,7 @@ add_definitions(
     -fno-permissive
     -pedantic
     -Wall
-    -Wextra
+#    -Wextra
     -fPIC
 )
 
@@ -33,8 +33,8 @@ link_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/out/native/obj.target/tools/gyp
 )
 
+add_subdirectory(example)
 add_subdirectory(src)
-add_subdirectory(test)
 add_subdirectory(v8runner)
 
 enable_testing()
