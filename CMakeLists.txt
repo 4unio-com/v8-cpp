@@ -13,12 +13,14 @@ add_definitions(
     -fPIC
 )
 
-find_package(Node REQUIRED)
-
 include_directories(
-    ${NODE_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/include
+)
+link_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/out/native/obj.target/tools/gyp
 )
 
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(v8runner)

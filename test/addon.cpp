@@ -119,3 +119,4 @@ void InitAll(Handle<Object> exports)
 }
 
 NODE_MODULE(addon, InitAll)
+V8CPP_MODULE(addon, InitAll)
