@@ -26,6 +26,36 @@ namespace v8cpp
 namespace internal
 {
 
+using ModuleInitFunc = void(v8::Handle<v8::Object> exports);
+ModuleInitFunc* node_init_func_;
+std::string v8cpp_script_path_;
+
+struct NodeModule
+{
+    int nm_version;
+    unsigned int nm_flags;
+    void* nm_dso_handle;
+    const char* nm_filename;
+    ModuleInitFunc* nm_register_func;
+    //...
+};
+
+extern "C" void node_module_register(void* m)
+{
+    auto mp = static_cast<NodeModule*>(m);
+
+    // For now we only know that version 14 works here
+    if (mp->nm_version == 14)
+    {
+        node_init_func_ = mp->nm_register_func;
+    }
+    else
+    {
+        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
+                  << std::endl;
+    }
+}
+
 class Console
 {
 public:
@@ -58,52 +88,24 @@ public:
     }
 };
 
-using InitFunc = void(v8::Handle<v8::Object> exports);
-InitFunc* node_init_func;
-
-struct NodeModule
-{
-    int nm_version;
-    unsigned int nm_flags;
-    void* nm_dso_handle;
-    const char* nm_filename;
-    InitFunc* nm_register_func;
-    //...
-};
-
-extern "C" void node_module_register(void* m)
-{
-    auto mp = static_cast<NodeModule*>(m);
-
-    // For now we only know that version 14 works here
-    if (mp->nm_version == 14)
-    {
-        node_init_func = mp->nm_register_func;
-    }
-    else
-    {
-        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
-                  << std::endl;
-    }
-}
-
 inline v8::Local<v8::Object> require(std::string const& module_path)
 {
-    node_init_func = nullptr;
+    node_init_func_ = nullptr;
     v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
 
     // Try append ".node" to module_path
-    std::string suffixed_module_path = module_path + ".node";
+    std::string suffixed_module_path = v8cpp_script_path_ + "/" + module_path + ".node";
     auto module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
     if (!module)
     {
         // Didn't work, now try append ".so" to module_path
-        suffixed_module_path = module_path + ".so";
+        suffixed_module_path = v8cpp_script_path_ + "/" + module_path + ".so";
         module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
         if (!module)
         {
             // Still didn't work, just try module_path as is
-            module = dlopen(module_path.c_str(), RTLD_LAZY);
+            suffixed_module_path = v8cpp_script_path_ + "/" + module_path;
+            module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
             if (!module)
             {
                 std::cerr << "dlopen failed: " << dlerror() << std::endl;
@@ -112,13 +114,13 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
         }
     }
 
-    if (node_init_func)
+    if (node_init_func_)
     {
-        node_init_func(exports);
+        node_init_func_(exports);
     }
     else
     {
-        auto v8cpp_init_func = (InitFunc*)dlsym(module, "init_module");
+        auto v8cpp_init_func = (ModuleInitFunc*)dlsym(module, "init_module");
         if (!v8cpp_init_func)
         {
             std::cerr << "dlsym failed: " << dlerror() << std::endl;

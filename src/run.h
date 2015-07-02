@@ -45,6 +45,14 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
     {
         v8::Context::Scope context_scope(v8::Context::New(isolate));
 
+        // Store the script filename for use in require() later
+        internal::v8cpp_script_path_.clear();
+        std::size_t found = filename.find_last_of("/");
+        if (found != std::string::npos)
+        {
+            internal::v8cpp_script_path_ = filename.substr(0, found);
+        }
+
         module.add_function("require", &internal::require);
         module.add_class("console", console);
     }
