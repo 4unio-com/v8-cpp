@@ -26,6 +26,38 @@ namespace v8cpp
 namespace internal
 {
 
+class Console
+{
+public:
+    inline static void log(v8::FunctionCallbackInfo<v8::Value> const& args)
+    {
+        for (int i = 0; i < args.Length(); ++i)
+        {
+            if (args[i]->IsInt32())
+            {
+                std::cout << v8cpp::from_v8<int>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+            }
+            if (args[i]->IsUint32())
+            {
+                std::cout << v8cpp::from_v8<unsigned int>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+            }
+            else if (args[i]->IsNumber())
+            {
+                std::cout << v8cpp::from_v8<float>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+            }
+            else if (args[i]->IsBoolean())
+            {
+                std::cout << v8cpp::from_v8<bool>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+            }
+            else if (args[i]->IsString())
+            {
+                std::cout << v8cpp::from_v8<std::string>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+            }
+        }
+        std::cout.flush();
+    }
+};
+
 using InitFunc = void(v8::Handle<v8::Object> exports);
 InitFunc* node_init_func;
 
