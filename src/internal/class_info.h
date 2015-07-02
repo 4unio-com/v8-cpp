@@ -48,13 +48,11 @@ public:
                                {
                                    return base_class.info == info;
                                });
-        if (it != base_classes_.end())
+        if (it == base_classes_.end())
         {
-            assert(false && "duplicate base class found");
-            throw std::runtime_error("duplicate base class found");
+            base_classes_.emplace_back(info, cast);
+            info->child_classes_.emplace_back(this);
         }
-        base_classes_.emplace_back(info, cast);
-        info->child_classes_.emplace_back(this);
     }
 
     bool cast(void*& ptr, size_t type) const
