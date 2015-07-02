@@ -34,9 +34,20 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
     // Create a stack-allocated handle scope.
     v8::HandleScope handle_scope(isolate);
 
-    // Create a new context that supports "require()".
+    // Prepare console class
+    v8cpp::Class<internal::Console> console(isolate);
+    console
+            .set_constructor()
+            .add_method("log", &internal::Console::log);
+
+    // Create a new context that supports "require()" and "console".
     v8cpp::Module module(isolate);
-    module.add_function("require", &internal::require);
+    {
+        v8::Context::Scope context_scope(v8::Context::New(isolate));
+
+        module.add_function("require", &internal::require);
+        module.add_class("console", console);
+    }
     v8::Local<v8::Context> context = v8::Context::New(isolate, nullptr, module.object_template());
 
     // Enter the context for compiling and running the script.
