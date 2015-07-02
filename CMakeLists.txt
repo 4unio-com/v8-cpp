@@ -13,18 +13,6 @@ add_definitions(
     -fPIC
 )
 
-# Download and build dependencies
-message(STATUS "Retrieving dependencies")
-
-execute_process(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/build-deps.sh
-    RESULT_VARIABLE BUILD_DEPS_RESULT
-)
-
-if(NOT BUILD_DEPS_RESULT EQUAL 0)
-    message(FATAL_ERROR "Failed to retrieve dependencies")
-endif()
-
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/deps/v8/include

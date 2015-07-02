@@ -24,3 +24,8 @@ target_link_libraries(
     dl
     pthread
 )
+
+add_custom_command(
+    TARGET v8-cpp PRE_LINK
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../deps/build-deps.sh
+)
