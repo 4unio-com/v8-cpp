@@ -87,10 +87,6 @@ TEST(Test, call_overload_method_from_js)
 
     EXPECT_EQ(result, 5);
 
-    isolate->Dispose();
-
-    isolate = v8::Isolate::New();
-
     auto result2 = v8cpp::run_script<std::string>(isolate,
     R"(
         var module = require("./test-methods-module");
