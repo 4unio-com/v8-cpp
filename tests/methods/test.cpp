@@ -53,7 +53,7 @@ TEST(Test, call_base_method_from_js)
         test_object.base_method();
     )");
 
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(result, 1);
 
     isolate->Dispose();
 }

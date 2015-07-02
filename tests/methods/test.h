@@ -11,7 +11,7 @@ public:
 
     int base_method()
     {
-        return 0;
+        return 1;
     }
 
     virtual int virtual_method() = 0;
