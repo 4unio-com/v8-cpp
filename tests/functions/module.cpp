@@ -10,9 +10,14 @@ void InitAll(Handle<Object> exports)
     Isolate* isolate = Isolate::GetCurrent();
 
     // Prepare TestClass binding
+    v8cpp::Class<TestClass> testclass(isolate);
+    testclass
+            .set_constructor();
 
     // Prepare module
     v8cpp::Module module(isolate);
+
+    module.add_class("TestClass", testclass);
 
     exports->SetPrototype(module.create_prototype());
 }
