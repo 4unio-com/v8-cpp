@@ -50,7 +50,7 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
         std::size_t found = filename.find_last_of("/");
         if (found != std::string::npos)
         {
-            internal::v8cpp_script_path_ = filename.substr(0, found);
+            internal::v8cpp_script_path_ = filename.substr(0, found) + "/";
         }
 
         module.add_function("require", &internal::require);

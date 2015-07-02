@@ -94,17 +94,17 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
     v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
 
     // Try append ".node" to module_path
-    std::string suffixed_module_path = v8cpp_script_path_ + "/" + module_path + ".node";
+    std::string suffixed_module_path = v8cpp_script_path_ + module_path + ".node";
     auto module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
     if (!module)
     {
         // Didn't work, now try append ".so" to module_path
-        suffixed_module_path = v8cpp_script_path_ + "/" + module_path + ".so";
+        suffixed_module_path = v8cpp_script_path_ + module_path + ".so";
         module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
         if (!module)
         {
             // Still didn't work, just try module_path as is
-            suffixed_module_path = v8cpp_script_path_ + "/" + module_path;
+            suffixed_module_path = v8cpp_script_path_ + module_path;
             module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
             if (!module)
             {
