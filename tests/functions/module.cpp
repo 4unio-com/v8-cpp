@@ -10,14 +10,15 @@ void InitAll(Handle<Object> exports)
     Isolate* isolate = Isolate::GetCurrent();
 
     // Prepare TestClass binding
-    v8cpp::Class<TestClass> testclass(isolate);
-    testclass
-            .set_constructor();
+    v8cpp::Class<TestCaller> testcaller(isolate);
+    testcaller
+            .set_constructor<Local<Function>>()
+            .add_method("call_me", &TestCaller::call_me);
 
     // Prepare module
     v8cpp::Module module(isolate);
 
-    module.add_class("TestClass", testclass);
+    module.add_class("TestCaller", testcaller);
 
     exports->SetPrototype(module.create_prototype());
 }

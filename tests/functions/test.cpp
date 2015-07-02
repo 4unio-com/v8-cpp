@@ -8,16 +8,27 @@
 // call JS function from C++ (callback)
 // call C++ functions from JS
 
-TEST(Test, basic)
+TEST(Test, call_to_js)
 {
     v8::Isolate* isolate = v8::Isolate::New();
 
-    auto test_object = v8cpp::run_script<TestClass>(isolate,
+    auto callback_result = v8cpp::run_script<std::string>(isolate,
     R"(
         var module = require("./test-functions-module");
-        var test_object = new module.TestClass();
-        test_object;
+
+        var caller = new module.TestCaller(function(message)
+        {
+            return message + " world" // "hello world"
+        });
+
+        caller.call_me();
     )");
 
+    EXPECT_EQ(callback_result, "hello world");
+
     isolate->Dispose();
+}
+
+TEST(Test, call_from_js)
+{
 }
