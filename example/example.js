@@ -1,4 +1,4 @@
-var addon = require('./v8-cpp-test');
+var addon = require('./v8-cpp-example');
 
 var obj = addon.new_MyObject(10);
 console.log( obj.plus_one() ); // 11
