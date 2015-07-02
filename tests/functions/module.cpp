@@ -19,6 +19,8 @@ void InitAll(Handle<Object> exports)
     v8cpp::Module module(isolate);
 
     module.add_class("TestCaller", testcaller);
+    module.add_function("simple_function", &simple_function);
+    module.add_function("complex_function", &complex_function);
 
     exports->SetPrototype(module.create_prototype());
 }
