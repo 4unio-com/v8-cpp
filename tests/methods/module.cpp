@@ -10,9 +10,16 @@ void InitAll(Handle<Object> exports)
     Isolate* isolate = Isolate::GetCurrent();
 
     // Prepare TestClass binding
-    v8cpp::Class<TestClass> testclass(isolate);
+    v8cpp::Class<TestClass_OL> testclass(isolate);
     testclass
-            .set_constructor();
+            .add_inheritance<BaseTestClass>()
+            .add_inheritance<TestClass>()
+            .set_constructor()
+            .add_method("regular_method", &TestClass::regular_method)
+            .add_method("static_method", &TestClass::static_method)
+            .add_method("base_method", &BaseTestClass::base_method)
+            .add_method("virtual_method", &TestClass::virtual_method)
+            .add_method("overload_method", &TestClass_OL::overload_method);
 
     // Prepare module
     v8cpp::Module module(isolate);
