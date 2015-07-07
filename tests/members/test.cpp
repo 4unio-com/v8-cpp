@@ -15,25 +15,24 @@ TEST(Test, get_set_members_from_js)
     R"(
         var module = require("./test-members-module");
         var test_struct = new module.TestStruct();
-        test_struct;
-    )");
 
-    EXPECT_EQ(test_struct.bool_value, true);
-    EXPECT_EQ(test_struct.int_value, 9);
-    EXPECT_FLOAT_EQ(test_struct.float_value, 0.1);
-    EXPECT_EQ(test_struct.string_value, "hello");
-
-    test_struct = v8cpp::run_script<TestStruct>(isolate,
-    R"(
-        var module = require("./test-members-module");
-        var test_struct = new module.TestStruct();
         if (test_struct.bool_value)
         {
             test_struct.bool_value = false;
+        }
+        if (test_struct.int_value == 9)
+        {
             test_struct.int_value = -1;
+        }
+        if (test_struct.float_value - 0.1 < 0.001)
+        {
             test_struct.float_value = test_struct.int_value + 0.12;
+        }
+        if (test_struct.string_value == "hello")
+        {
             test_struct.string_value = test_struct.string_value + " there";
         }
+
         test_struct;
     )");
 

@@ -1,6 +1,7 @@
 #include "test.h"
 
 #include <v8-cpp.h>
+#include <node.h>
 
 using namespace v8;
 
@@ -26,4 +27,4 @@ void InitAll(Handle<Object> exports)
     exports->SetPrototype(module.create_prototype());
 }
 
-V8CPP_MODULE(addon, InitAll)
+NODE_MODULE(addon, InitAll)
