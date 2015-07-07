@@ -4,7 +4,20 @@
 
 #include <v8-cpp.h>
 
-class BaseTestClass
+class BaseBaseTestClass
+{
+public:
+    virtual ~BaseBaseTestClass() = default;
+
+    int base_base_method()
+    {
+        return 0;
+    }
+
+    virtual int virtual_method() = 0;
+};
+
+class BaseTestClass : public BaseBaseTestClass
 {
 public:
     virtual ~BaseTestClass() = default;
@@ -13,8 +26,6 @@ public:
     {
         return 1;
     }
-
-    virtual int virtual_method() = 0;
 };
 
 class TestClass : public BaseTestClass

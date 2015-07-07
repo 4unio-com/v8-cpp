@@ -1,26 +1,28 @@
 # MODULE
 add_library(
-    test-methods-module SHARED
+    test-run-module SHARED
     module.cpp
 )
 
 # This line sets the output binary name to "<target_name>.so"
 set_target_properties(
-    test-methods-module
+    test-run-module
     PROPERTIES
     PREFIX ""
-    SUFFIX ".so"
 )
 
 # TEST
+configure_file(scripts/test.js scripts/test.js)
+configure_file(scripts/test2.js scripts/test2.js)
+
 add_executable(
-    test-methods
+    test-run
     test.h
     test.cpp
 )
 
 target_link_libraries(
-    test-methods
+    test-run
 
     v8-cpp
 
@@ -30,6 +32,6 @@ target_link_libraries(
 )
 
 add_test(
-    test-methods
-    test-methods
+    test-run
+    test-run
 )

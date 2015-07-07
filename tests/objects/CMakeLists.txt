@@ -4,12 +4,12 @@ add_library(
     module.cpp
 )
 
-# This line sets the output binary name to "<target_name>.node"
+# This line sets the output binary name to "<target_name>"
 set_target_properties(
     test-objects-module
     PROPERTIES
     PREFIX ""
-    SUFFIX ".node"
+    SUFFIX ""
 )
 
 # TEST

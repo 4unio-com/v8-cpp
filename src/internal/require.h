@@ -63,27 +63,28 @@ public:
     {
         for (int i = 0; i < args.Length(); ++i)
         {
-            if (args[i]->IsInt32())
-            {
-                std::cout << v8cpp::from_v8<int>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
-            }
             if (args[i]->IsUint32())
             {
-                std::cout << v8cpp::from_v8<unsigned int>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+                std::cout << v8cpp::from_v8<unsigned int>(v8::Isolate::GetCurrent(), args[i]);
+            }
+            else if (args[i]->IsInt32())
+            {
+                std::cout << v8cpp::from_v8<int>(v8::Isolate::GetCurrent(), args[i]);
             }
             else if (args[i]->IsNumber())
             {
-                std::cout << v8cpp::from_v8<float>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+                std::cout << v8cpp::from_v8<float>(v8::Isolate::GetCurrent(), args[i]);
             }
             else if (args[i]->IsBoolean())
             {
-                std::cout << v8cpp::from_v8<bool>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+                std::cout << v8cpp::from_v8<bool>(v8::Isolate::GetCurrent(), args[i]);
             }
             else if (args[i]->IsString())
             {
-                std::cout << v8cpp::from_v8<std::string>(v8::Isolate::GetCurrent(), args[i]) << std::endl;
+                std::cout << v8cpp::from_v8<std::string>(v8::Isolate::GetCurrent(), args[i]);
             }
         }
+        std::cout << std::endl;
         std::cout.flush();
     }
 };
@@ -108,8 +109,7 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
             module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
             if (!module)
             {
-                std::cerr << "dlopen failed: " << dlerror() << std::endl;
-                return exports;
+                throw std::runtime_error("dlopen failed: " + std::string(dlerror()));
             }
         }
     }
@@ -123,8 +123,7 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
         auto v8cpp_init_func = (ModuleInitFunc*)dlsym(module, "init_module");
         if (!v8cpp_init_func)
         {
-            std::cerr << "dlsym failed: " << dlerror() << std::endl;
-            return exports;
+            throw std::runtime_error("dlsym failed: " + std::string(dlerror()));
         }
 
         v8cpp_init_func(exports);

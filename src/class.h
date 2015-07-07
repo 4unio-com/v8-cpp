@@ -72,22 +72,16 @@ public:
 
     // Add class member
     template <typename P>
-    Class& add_member(char const* name, P property, bool readonly = false)
+    Class& add_member(char const* name, P property)
     {
         v8::HandleScope scope(class_.isolate());
 
         v8::AccessorGetterCallback getter = &internal::Class<T>::template get_member<P>;
         v8::AccessorSetterCallback setter = &internal::Class<T>::template set_member<P>;
-        if (readonly)
-        {
-            setter = nullptr;
-        }
-
         v8::Handle<v8::Value> data = internal::export_value(class_.isolate(), property);
-        v8::PropertyAttribute prop_attrs = v8::PropertyAttribute(v8::DontDelete | (setter ? 0 : v8::ReadOnly));
 
         class_.class_template()->PrototypeTemplate()->SetAccessor(to_v8(class_.isolate(), name), getter, setter, data,
-                                                                  v8::DEFAULT, prop_attrs);
+                                                                  v8::DEFAULT, v8::DontDelete);
         return *this;
     }
 

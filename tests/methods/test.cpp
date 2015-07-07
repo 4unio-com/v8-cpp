@@ -55,6 +55,15 @@ TEST(Test, call_base_method_from_js)
 
     EXPECT_EQ(result, 1);
 
+    result = v8cpp::run_script<int>(isolate,
+    R"(
+        var module = require("./test-methods-module");
+        var test_object = new module.TestClass();
+        test_object.base_base_method();
+    )");
+
+    EXPECT_EQ(result, 0);
+
     isolate->Dispose();
 }
 
