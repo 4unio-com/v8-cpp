@@ -109,8 +109,7 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
             module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
             if (!module)
             {
-                std::cerr << "dlopen failed: " << dlerror() << std::endl;
-                return exports;
+                throw std::runtime_error("dlopen failed: " + std::string(dlerror()));
             }
         }
     }
@@ -124,8 +123,7 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
         auto v8cpp_init_func = (ModuleInitFunc*)dlsym(module, "init_module");
         if (!v8cpp_init_func)
         {
-            std::cerr << "dlsym failed: " << dlerror() << std::endl;
-            return exports;
+            throw std::runtime_error("dlsym failed: " + std::string(dlerror()));
         }
 
         v8cpp_init_func(exports);

@@ -4,7 +4,7 @@ add_library(
     module.cpp
 )
 
-# This line sets the output binary name to "<target_name>.node"
+# This line sets the output binary name to "<target_name>.so"
 set_target_properties(
     test-methods-module
     PROPERTIES

@@ -77,7 +77,16 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
         }
     }
 
-    return v8cpp::from_v8<T>(isolate, script->Run());
+    v8::TryCatch try_catch;
+
+    auto result = script->Run();
+
+    if (try_catch.HasCaught())
+    {
+        throw std::runtime_error(v8cpp::from_v8<std::string>(isolate, try_catch.Message()->Get()));
+    }
+
+    return v8cpp::from_v8<T>(isolate, result);
 }
 
 template <typename T = v8::Handle<v8::Value>>
