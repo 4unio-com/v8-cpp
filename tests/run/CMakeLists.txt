@@ -1,26 +1,28 @@
 # MODULE
 add_library(
-    test-objects-module SHARED
+    test-run-module SHARED
     module.cpp
 )
 
 # This line sets the output binary name to "<target_name>.node"
 set_target_properties(
-    test-objects-module
+    test-run-module
     PROPERTIES
     PREFIX ""
-    SUFFIX ""
 )
 
 # TEST
+configure_file(scripts/test.js scripts/test.js)
+configure_file(scripts/test2.js scripts/test2.js)
+
 add_executable(
-    test-objects
+    test-run
     test.h
     test.cpp
 )
 
 target_link_libraries(
-    test-objects
+    test-run
 
     v8-cpp
 
@@ -30,6 +32,6 @@ target_link_libraries(
 )
 
 add_test(
-    test-objects
-    test-objects
+    test-run
+    test-run
 )

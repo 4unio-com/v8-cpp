@@ -9,7 +9,7 @@ set_target_properties(
     test-methods-module
     PROPERTIES
     PREFIX ""
-    SUFFIX ".node"
+    SUFFIX ".so"
 )
 
 # TEST
