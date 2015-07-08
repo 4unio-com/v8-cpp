@@ -27,9 +27,7 @@
 
 TEST(Test, get_set_members_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto test_struct = v8cpp::run_script<TestStruct>(isolate,
+    auto test_struct = v8cpp::run_script<TestStruct>(
     R"(
         var module = require("./test-members-module");
         var test_struct = new module.TestStruct();
@@ -58,6 +56,4 @@ TEST(Test, get_set_members_from_js)
     EXPECT_EQ(test_struct.int_value, -1);
     EXPECT_FLOAT_EQ(test_struct.float_value, -0.88);
     EXPECT_EQ(test_struct.string_value, "hello there");
-
-    isolate->Dispose();
 }

@@ -20,6 +20,7 @@
 
 #include <dlfcn.h>
 #include <iostream>
+#include <memory>
 
 namespace v8cpp
 {
@@ -28,7 +29,7 @@ namespace internal
 
 using ModuleInitFunc = void(v8::Handle<v8::Object> exports);
 ModuleInitFunc* node_init_func_;
-std::string v8cpp_script_path_;
+std::shared_ptr<std::string> v8cpp_script_path_;
 
 struct NodeModule
 {
@@ -92,20 +93,20 @@ public:
 inline v8::Local<v8::Object> require(std::string const& module_path)
 {
     node_init_func_ = nullptr;
-    v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
+    std::string script_path = v8cpp_script_path_ ? *v8cpp_script_path_ : "";
 
     // Try append ".node" to module_path
-    std::string suffixed_module_path = v8cpp_script_path_ + module_path + ".node";
+    std::string suffixed_module_path = script_path + module_path + ".node";
     auto module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
     if (!module)
     {
         // Didn't work, now try append ".so" to module_path
-        suffixed_module_path = v8cpp_script_path_ + module_path + ".so";
+        suffixed_module_path = script_path + module_path + ".so";
         module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
         if (!module)
         {
             // Still didn't work, just try module_path as is
-            suffixed_module_path = v8cpp_script_path_ + module_path;
+            suffixed_module_path = script_path + module_path;
             module = dlopen(suffixed_module_path.c_str(), RTLD_LAZY);
             if (!module)
             {
@@ -113,6 +114,8 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
             }
         }
     }
+
+    v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
 
     if (node_init_func_)
     {

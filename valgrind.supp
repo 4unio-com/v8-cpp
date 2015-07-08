@@ -1,0 +1,40 @@
+# The V8 garbage collector is not guaranteed to clean up any exported memory.
+# Therefore we can only ensure that we have implemented the appropriate weak
+# pointer destructors and suppress the leak errors here.
+
+{
+   GC not cleaning up exported values
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN5v8cpp8internal12export_value*
+}
+
+{
+   GC not cleaning up exported objects
+   Memcheck:Leak
+   fun:_Znwm
+   ...
+   fun:*export_objectERKN2v820FunctionCallbackInfoINS4_5ValueEEE
+}
+
+{
+   GC not cleaning up exported objects (via to_v8)
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN5v8cpp8internal7Convert*to_v8EPN2v87IsolateERKS2_
+   fun:_ZN5v8cpp5to_v8*
+   fun:_ZN5v8cpp8internal14forward_invoke*
+   fun:_ZN5v8cpp8internal16forward_function*
+}
+
+{
+   GC not cleaning up exported objects (via factory)
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_Z*new_*
+   fun:_ZN5v8cpp8internal17call_from_v8_impl*
+   fun:_ZN5v8cpp8internal12call_from_v8*
+   fun:_ZN5v8cpp8internal6invoke*
+   fun:_ZN5v8cpp8internal14forward_invoke*
+   fun:_ZN5v8cpp8internal16forward_function*
+}

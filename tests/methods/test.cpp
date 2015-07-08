@@ -31,9 +31,7 @@
 
 TEST(Test, call_regular_method_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto result = v8cpp::run_script<int>(isolate,
+    auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-methods-module");
         var test_object = new module.TestClass();
@@ -41,30 +39,22 @@ TEST(Test, call_regular_method_from_js)
     )");
 
     EXPECT_EQ(result, 2);
-
-    isolate->Dispose();
 }
 
 TEST(Test, call_static_method_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto result = v8cpp::run_script<int>(isolate,
+    auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-methods-module");
         module.TestClass.static_method();
     )");
 
     EXPECT_EQ(result, 3);
-
-    isolate->Dispose();
 }
 
 TEST(Test, call_base_method_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto result = v8cpp::run_script<int>(isolate,
+    auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-methods-module");
         var test_object = new module.TestClass();
@@ -73,7 +63,7 @@ TEST(Test, call_base_method_from_js)
 
     EXPECT_EQ(result, 1);
 
-    result = v8cpp::run_script<int>(isolate,
+    result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-methods-module");
         var test_object = new module.TestClass();
@@ -81,15 +71,11 @@ TEST(Test, call_base_method_from_js)
     )");
 
     EXPECT_EQ(result, 0);
-
-    isolate->Dispose();
 }
 
 TEST(Test, call_override_method_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto result = v8cpp::run_script<int>(isolate,
+    auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-methods-module");
         var test_object = new module.TestClass();
@@ -97,15 +83,11 @@ TEST(Test, call_override_method_from_js)
     )");
 
     EXPECT_EQ(result, 4);
-
-    isolate->Dispose();
 }
 
 TEST(Test, call_overload_method_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto result = v8cpp::run_script<int>(isolate,
+    auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-methods-module");
         var test_object = new module.TestClass();
@@ -114,7 +96,7 @@ TEST(Test, call_overload_method_from_js)
 
     EXPECT_EQ(result, 5);
 
-    auto result2 = v8cpp::run_script<std::string>(isolate,
+    auto result2 = v8cpp::run_script<std::string>(
     R"(
         var module = require("./test-methods-module");
         var test_object = new module.TestClass();
@@ -122,6 +104,4 @@ TEST(Test, call_overload_method_from_js)
     )");
 
     EXPECT_EQ(result2, "6");
-
-    isolate->Dispose();
 }

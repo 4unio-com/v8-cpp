@@ -28,9 +28,7 @@
 
 TEST(Test, call_to_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto callback_result = v8cpp::run_script<std::string>(isolate,
+    auto callback_result = v8cpp::run_script<std::string>(
     R"(
         var module = require("./test-functions-module");
 
@@ -43,15 +41,11 @@ TEST(Test, call_to_js)
     )");
 
     EXPECT_EQ(callback_result, "hello world");
-
-    isolate->Dispose();
 }
 
 TEST(Test, call_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto result = v8cpp::run_script<std::string>(isolate,
+    auto result = v8cpp::run_script<std::string>(
     R"(
         var module = require("./test-functions-module");
         module.simple_function();
@@ -59,7 +53,7 @@ TEST(Test, call_from_js)
 
     EXPECT_EQ(result, "hello there");
 
-    auto result2 = v8cpp::run_script<std::vector<float>>(isolate,
+    auto result2 = v8cpp::run_script<std::vector<float>>(
     R"(
         var module = require("./test-functions-module");
         module.complex_function(4, "3", 2.1, false);
@@ -70,6 +64,4 @@ TEST(Test, call_from_js)
     EXPECT_FLOAT_EQ(result2[1], 3);
     EXPECT_FLOAT_EQ(result2[2], 2.1);
     EXPECT_FLOAT_EQ(result2[3], 0);
-
-    isolate->Dispose();
 }

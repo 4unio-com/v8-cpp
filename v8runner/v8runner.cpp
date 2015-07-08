@@ -29,14 +29,8 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    // Create a new isolate to run our script in.
-    Isolate* isolate = Isolate::New();
-
     // Run script.
-    v8cpp::run_script_file(isolate, argv[1]);
-
-    // Clean up.
-    isolate->Dispose();
+    v8cpp::run_script_file(argv[1]);
 
     return 0;
 }

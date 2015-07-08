@@ -472,7 +472,7 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
     {
         if (!is_valid(isolate, value))
         {
-            return nullptr;
+            throw std::invalid_argument("expected an object");
         }
         return Class<ClassType>::instance(isolate).import_object(value);
     }

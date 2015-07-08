@@ -21,48 +21,68 @@
 #include <internal/require.h>
 
 #include <fstream>
+#include <memory>
 
 namespace v8cpp
 {
 
 template <typename T = v8::Handle<v8::Value>>
-T run_script(v8::Isolate* isolate, std::string const& source, std::string const& filename = "")
+T run_script(std::string const& source, std::string const& filename = "")
 {
+    // Create an isolate
+    std::shared_ptr<v8::Isolate> isolate(v8::Isolate::New(), [](v8::Isolate* isolate)
+    {
+        // Clean up
+        using ClassInstances = std::vector<v8cpp::internal::Class<void>*>;
+        ClassInstances* instances = static_cast<ClassInstances*>(isolate->GetData(0));
+        if (instances)
+        {
+            for (auto instance : *instances)
+            {
+                delete instance;
+            }
+        }
+        delete instances;
+        isolate->SetData(0, nullptr);
+        isolate->Dispose();
+
+        internal::v8cpp_script_path_.reset();
+    });
+
     // Create an isolate scope.
-    v8::Isolate::Scope isolate_scope(isolate);
+    v8::Isolate::Scope isolate_scope(isolate.get());
 
     // Create a stack-allocated handle scope.
-    v8::HandleScope handle_scope(isolate);
+    v8::HandleScope handle_scope(isolate.get());
 
     // Prepare console class
-    v8cpp::Class<internal::Console> console(isolate);
+    v8cpp::Class<internal::Console> console(isolate.get());
     console
             .set_constructor()
             .add_method("log", &internal::Console::log);
 
     // Create a new context that supports "require()" and "console".
-    v8cpp::Module module(isolate);
+    v8cpp::Module module(isolate.get());
     {
-        v8::Context::Scope context_scope(v8::Context::New(isolate));
+        v8::Context::Scope context_scope(v8::Context::New(isolate.get()));
 
         // Store the script filename for use in require() later
-        internal::v8cpp_script_path_.clear();
         std::size_t found = filename.find_last_of("/");
         if (found != std::string::npos)
         {
-            internal::v8cpp_script_path_ = filename.substr(0, found) + "/";
+            internal::v8cpp_script_path_ = std::make_shared<std::string>(filename.substr(0, found) + "/");
         }
 
         module.add_function("require", &internal::require);
         module.add_class("console", console);
     }
-    v8::Local<v8::Context> context = v8::Context::New(isolate, nullptr, module.object_template());
+    v8::Local<v8::Context> context = v8::Context::New(isolate.get(), nullptr, module.object_template());
 
     // Enter the context for compiling and running the script.
     v8::Context::Scope context_scope(context);
 
     // Compile the script.
-    v8::Local<v8::Script> script = v8::Script::Compile(v8cpp::to_v8(isolate, source), v8cpp::to_v8(isolate, filename));
+    v8::Local<v8::Script> script = v8::Script::Compile(v8cpp::to_v8(isolate.get(), source), v8cpp::to_v8(isolate.get(), filename));
 
     // Run the script.
     if (script.IsEmpty())
@@ -83,14 +103,14 @@ T run_script(v8::Isolate* isolate, std::string const& source, std::string const&
 
     if (try_catch.HasCaught())
     {
-        throw std::runtime_error(v8cpp::from_v8<std::string>(isolate, try_catch.Message()->Get()));
+        throw std::runtime_error(v8cpp::from_v8<std::string>(isolate.get(), try_catch.Message()->Get()));
     }
 
-    return v8cpp::from_v8<T>(isolate, result);
+    return v8cpp::from_v8<T>(isolate.get(), result);
 }
 
 template <typename T = v8::Handle<v8::Value>>
-T run_script_file(v8::Isolate* isolate, std::string const& filename)
+T run_script_file(std::string const& filename)
 {
     std::ifstream stream(filename.c_str());
     if (!stream)
@@ -99,6 +119,6 @@ T run_script_file(v8::Isolate* isolate, std::string const& filename)
     }
 
     std::istreambuf_iterator<char> begin(stream), end;
-    return run_script<T>(isolate, std::string(begin, end), filename);
+    return run_script<T>(std::string(begin, end), filename);
 }
 }

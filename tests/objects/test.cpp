@@ -30,9 +30,7 @@
 
 TEST(Test, construct_class_via_new)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto test_object = v8cpp::run_script<TestClass>(isolate,
+    auto test_object = v8cpp::run_script<TestClass>(
     R"(
         var module = require("./test-objects-module");
         var test_object = new module.TestClass(1, 2);
@@ -40,15 +38,11 @@ TEST(Test, construct_class_via_new)
     )");
 
     EXPECT_EQ(test_object.i(), 3);
-
-    isolate->Dispose();
 }
 
 TEST(Test, construct_class_via_factory)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto test_object = v8cpp::run_script<TestClass>(isolate,
+    auto test_object = v8cpp::run_script<TestClass>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
@@ -56,15 +50,11 @@ TEST(Test, construct_class_via_factory)
     )");
 
     EXPECT_EQ(test_object.i(), 3);
-
-    isolate->Dispose();
 }
 
 TEST(Test, object_to_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto test_object = v8cpp::run_script<EmbeddedTestClass*>(isolate,
+    auto test_object = v8cpp::run_script<EmbeddedTestClass*>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
@@ -73,7 +63,7 @@ TEST(Test, object_to_js)
 
     EXPECT_EQ(test_object->i(), -1);
 
-    auto test_object2 = v8cpp::run_script<EmbeddedTestClass&>(isolate,
+    auto test_object2 = v8cpp::run_script<EmbeddedTestClass&>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
@@ -82,7 +72,7 @@ TEST(Test, object_to_js)
 
     EXPECT_EQ(test_object2.i(), -1);
 
-    auto test_object3 = v8cpp::run_script<EmbeddedTestClass>(isolate,
+    auto test_object3 = v8cpp::run_script<EmbeddedTestClass>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
@@ -90,15 +80,11 @@ TEST(Test, object_to_js)
     )");
 
     EXPECT_EQ(test_object3.i(), -1);
-
-    isolate->Dispose();
 }
 
 TEST(Test, object_from_js)
 {
-    v8::Isolate* isolate = v8::Isolate::New();
-
-    auto test_object = v8cpp::run_script<TestClass>(isolate,
+    auto test_object = v8cpp::run_script<TestClass>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
@@ -110,7 +96,7 @@ TEST(Test, object_from_js)
 
     EXPECT_EQ(test_object.i(), -1);
 
-    auto result = v8cpp::run_script<int>(isolate,
+    auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
@@ -121,6 +107,4 @@ TEST(Test, object_from_js)
     )");
 
     EXPECT_EQ(result, -2);
-
-    isolate->Dispose();
 }
