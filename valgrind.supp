@@ -14,7 +14,7 @@
    Memcheck:Leak
    fun:_Znwm
    ...
-   fun:*export_objectERKN2v820FunctionCallbackInfoINS4_5ValueEEE
+   fun:_ZN5v8cpp8internal5Class*export_object*
 }
 
 {
