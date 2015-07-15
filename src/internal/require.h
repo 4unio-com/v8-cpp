@@ -28,8 +28,8 @@ namespace internal
 {
 
 using ModuleInitFunc = void(v8::Handle<v8::Object> exports);
-ModuleInitFunc* node_init_func_;
-std::shared_ptr<std::string> v8cpp_script_path_;
+///!ModuleInitFunc* node_init_func_;
+///!std::shared_ptr<std::string> v8cpp_script_path_;
 
 struct NodeModule
 {
@@ -48,7 +48,7 @@ extern "C" void node_module_register(void* m)
     // For now we only know that version 14 works here
     if (mp->nm_version == 14)
     {
-        node_init_func_ = mp->nm_register_func;
+        ///!node_init_func_ = mp->nm_register_func;
     }
     else
     {
@@ -92,8 +92,8 @@ public:
 
 inline v8::Local<v8::Object> require(std::string const& module_path)
 {
-    node_init_func_ = nullptr;
-    std::string script_path = v8cpp_script_path_ ? *v8cpp_script_path_ : "";
+    ///!node_init_func_ = nullptr;
+    std::string script_path; ///! = v8cpp_script_path_ ? *v8cpp_script_path_ : "";
 
     // Try append ".node" to module_path
     std::string suffixed_module_path = script_path + module_path + ".node";
@@ -117,12 +117,12 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
 
     v8::Local<v8::Object> exports = v8::Object::New(v8::Isolate::GetCurrent());
 
-    if (node_init_func_)
-    {
-        node_init_func_(exports);
-    }
-    else
-    {
+///!    if (node_init_func_)
+///!    {
+///!        node_init_func_(exports);
+///!    }
+///!    else
+///!    {
         auto v8cpp_init_func = (ModuleInitFunc*)dlsym(module, "init_module");
         if (!v8cpp_init_func)
         {
@@ -130,7 +130,7 @@ inline v8::Local<v8::Object> require(std::string const& module_path)
         }
 
         v8cpp_init_func(exports);
-    }
+///!    }
 
     return exports;
 }

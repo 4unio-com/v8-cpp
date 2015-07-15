@@ -46,7 +46,7 @@ T run_script(std::string const& source, std::string const& filename = "")
         isolate->SetData(0, nullptr);
         isolate->Dispose();
 
-        internal::v8cpp_script_path_.reset();
+        ///!internal::v8cpp_script_path_.reset();
     });
 
     // Create an isolate scope.
@@ -70,7 +70,7 @@ T run_script(std::string const& source, std::string const& filename = "")
         std::size_t found = filename.find_last_of("/");
         if (found != std::string::npos)
         {
-            internal::v8cpp_script_path_ = std::make_shared<std::string>(filename.substr(0, found) + "/");
+            ///!internal::v8cpp_script_path_ = std::make_shared<std::string>(filename.substr(0, found) + "/");
         }
 
         module.add_function("require", &internal::require);
