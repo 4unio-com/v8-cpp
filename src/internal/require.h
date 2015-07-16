@@ -41,21 +41,21 @@ struct NodeModule
     //...
 };
 
-extern "C" void node_module_register(void* m)
-{
-    auto mp = static_cast<NodeModule*>(m);
-
-    // For now we only know that version 14 works here
-    if (mp->nm_version == 14)
-    {
-        ///!node_init_func_ = mp->nm_register_func;
-    }
-    else
-    {
-        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
-                  << std::endl;
-    }
-}
+///!extern "C" void node_module_register(void* m)
+///!
+///!    auto mp = static_cast<NodeModule*>(m);
+///!
+///!    // For now we only know that version 14 works here
+///!    if (mp->nm_version == 14)
+///!    {
+///!        node_init_func_ = mp->nm_register_func;
+///!    }
+///!    else
+///!    {
+///!        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
+///!                  << std::endl;
+///!    }
+///!}
 
 class Console
 {

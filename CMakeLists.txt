@@ -9,8 +9,9 @@ add_definitions(
     -fno-permissive
     -pedantic
     -Wall
-#    -Wextra
+    -Wextra
     -fPIC
+    -Wno-unused-parameter
 )
 
 # Configure CMake environment
