@@ -72,8 +72,9 @@ T run_script(std::string const& source, std::string const& filename = "")
             script_path = filename.substr(0, found) + "/";
         }
 
-        v8::Handle<v8::Value> data = internal::export_value(isolate.get(), new internal::Require(script_path));
-        module.object_template()->Set(isolate.get(), "require", v8::FunctionTemplate::New(isolate.get(), internal::Require::require, data));
+        v8::Handle<v8::Value> require = internal::export_value(isolate.get(), new internal::Require(script_path));
+        module.object_template()->Set(isolate.get(), "require",
+                                      v8::FunctionTemplate::New(isolate.get(), internal::Require::require, require));
 
         module.add_class("console", console);
     }
@@ -83,7 +84,8 @@ T run_script(std::string const& source, std::string const& filename = "")
     v8::Context::Scope context_scope(context);
 
     // Compile the script.
-    v8::Local<v8::Script> script = v8::Script::Compile(v8cpp::to_v8(isolate.get(), source), v8cpp::to_v8(isolate.get(), filename));
+    v8::Local<v8::Script> script = v8::Script::Compile(v8cpp::to_v8(isolate.get(), source),
+                                                       v8cpp::to_v8(isolate.get(), filename));
 
     // Run the script.
     if (script.IsEmpty())

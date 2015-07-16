@@ -164,6 +164,5 @@ private:
     std::string script_path_;
 };
 
-
 }  // namespace internal
 }  // namespace v8cpp
