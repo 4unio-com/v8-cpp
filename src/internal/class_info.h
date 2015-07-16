@@ -42,7 +42,7 @@ public:
 
     using CastFunction = void* (*)(void*);
 
-    void add_base_class(ClassInfo* info, CastFunction cast)
+    inline void add_base_class(ClassInfo* info, CastFunction cast)
     {
         auto it = std::find_if(base_classes_.begin(), base_classes_.end(), [info](BaseClassInfo const& base_class)
                                {
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    bool cast(void*& ptr, size_t type) const
+    inline bool cast(void*& ptr, size_t type) const
     {
         // Type already matches
         if (type == type_)
@@ -111,7 +111,7 @@ public:
     }
 
 protected:
-    static size_t register_class()
+    inline static size_t register_class()
     {
         static size_t next_index = 0;
         return next_index++;

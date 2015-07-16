@@ -192,10 +192,10 @@ private:
                 {
                     return args.GetReturnValue().Set(instance(isolate).export_object(args));
                 }
-                catch (std::exception const& ex)
+                catch (std::exception const& e)
                 {
                     auto exception =
-                        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, ex.what())));
+                        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, e.what())));
                     args.GetReturnValue().Set(exception);
                 }
             });

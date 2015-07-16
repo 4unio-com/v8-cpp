@@ -22,6 +22,26 @@
 
 #include <gtest/gtest.h>
 
+TEST(Test, empty_module_path)
+{
+    try
+    {
+        v8cpp::run_script("require()");
+    }
+    catch (std::exception const& e)
+    {
+        EXPECT_STREQ(e.what(), "Uncaught Error: require() call missing string argument");
+    }
+    try
+    {
+        v8cpp::run_script("require('')");
+    }
+    catch (std::exception const& e)
+    {
+        EXPECT_STREQ(e.what(), "Uncaught Error: require() call missing string argument");
+    }
+}
+
 TEST(Test, non_existent_module)
 {
     try

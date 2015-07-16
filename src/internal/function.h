@@ -102,9 +102,9 @@ void forward_function(v8::FunctionCallbackInfo<v8::Value> const& args)
     {
         forward_invoke<F>(args);
     }
-    catch (std::exception const& ex)
+    catch (std::exception const& e)
     {
-        auto exception = isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, ex.what())));
+        auto exception = isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, e.what())));
         args.GetReturnValue().Set(exception);
     }
 }
