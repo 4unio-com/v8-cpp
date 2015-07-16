@@ -20,7 +20,6 @@
 
 #include <internal/call.h>
 #include <internal/utility/function_traits.h>
-#include <internal/utility/pointer_cast.h>
 
 namespace v8cpp
 {
@@ -34,15 +33,7 @@ template <typename F>
 using IsVoidReturn = std::is_same<void, typename FunctionTraits<F>::ReturnType>;
 
 template <typename T>
-typename std::enable_if<IsPointerCastAllowed<T>::value, v8::Local<v8::Value>>::type export_value(v8::Isolate* isolate,
-                                                                                                 T value)
-{
-    return v8::External::New(isolate, PointerCast<T>(value));
-}
-
-template <typename T>
-typename std::enable_if<!IsPointerCastAllowed<T>::value, v8::Local<v8::Value>>::type export_value(v8::Isolate* isolate,
-                                                                                                  T const& value)
+v8::Local<v8::Value> export_value(v8::Isolate* isolate, T const& value)
 {
     T* data = new T(value);
 
@@ -58,13 +49,7 @@ typename std::enable_if<!IsPointerCastAllowed<T>::value, v8::Local<v8::Value>>::
 }
 
 template <typename T>
-typename std::enable_if<IsPointerCastAllowed<T>::value, T>::type import_value(v8::Handle<v8::Value> value)
-{
-    return PointerCast<T>(value.As<v8::External>()->Value());
-}
-
-template <typename T>
-typename std::enable_if<!IsPointerCastAllowed<T>::value, T>::type import_value(v8::Handle<v8::Value> value)
+T import_value(v8::Handle<v8::Value> value)
 {
     T* data = static_cast<T*>(value.As<v8::External>()->Value());
     return *data;
