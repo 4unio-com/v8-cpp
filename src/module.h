@@ -53,12 +53,12 @@ public:
     }
 
     // Create an instance of this module in V8
-    v8::Local<v8::Object> create_prototype()
+    inline v8::Local<v8::Object> create_prototype()
     {
         return object_template_->NewInstance();
     }
 
-    v8::Handle<v8::ObjectTemplate> object_template()
+    inline v8::Handle<v8::ObjectTemplate> object_template()
     {
         return object_template_;
     }

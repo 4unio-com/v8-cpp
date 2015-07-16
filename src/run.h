@@ -45,8 +45,6 @@ T run_script(std::string const& source, std::string const& filename = "")
         delete instances;
         isolate->SetData(0, nullptr);
         isolate->Dispose();
-
-        ///!internal::v8cpp_script_path_.reset();
     });
 
     // Create an isolate scope.
@@ -67,13 +65,16 @@ T run_script(std::string const& source, std::string const& filename = "")
         v8::Context::Scope context_scope(v8::Context::New(isolate.get()));
 
         // Store the script filename for use in require() later
+        std::string script_path;
         std::size_t found = filename.find_last_of("/");
         if (found != std::string::npos)
         {
-            ///!internal::v8cpp_script_path_ = std::make_shared<std::string>(filename.substr(0, found) + "/");
+            script_path = filename.substr(0, found) + "/";
         }
 
-        module.add_function("require", &internal::require);
+        v8::Handle<v8::Value> data = internal::export_value(isolate.get(), new internal::Require(script_path));
+        module.object_template()->Set(isolate.get(), "require", v8::FunctionTemplate::New(isolate.get(), internal::Require::require, data));
+
         module.add_class("console", console);
     }
     v8::Local<v8::Context> context = v8::Context::New(isolate.get(), nullptr, module.object_template());
