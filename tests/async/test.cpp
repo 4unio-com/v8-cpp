@@ -23,24 +23,28 @@
 #include <gtest/gtest.h>
 
 // ASYNC
-// call JS function from C++ (callback)
-// call C++ functions from JS
 
-TEST(Test, call_to_js)
+// TEST(Test, call_to_js)
+//{
+//    auto callback_result = v8cpp::run_script(
+//        R"(
+//            var addon = require('./test-async-module');
+
+//            var i = 0;
+
+//            // test the delay function
+//            addon.delay(3, 'hello world', function(a, b)
+//            {
+//                console.log('delay : ' + a + ',' + b);
+//            });
+//        )");
+//}
+
+TEST(Test, call_to_js2)
 {
     auto callback_result = v8cpp::run_script(
-    R"(
+        R"(
             var addon = require('./test-async-module');
-
-            var i = 0;
-
-            //setInterval(function() {
-            //  console.log(i++);
-            //},500);
-
-            // test the delay function
-            addon.delay(3,'hello world',function(a,b) {
-              console.log('delay : ' + a + ',' + b);
-            });
-    )");
+            addon.do();
+        )");
 }
