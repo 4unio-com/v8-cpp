@@ -1,3 +1,9 @@
+find_package(Node REQUIRED)
+
+include_directories(
+    ${NODE_INCLUDE_DIRS}
+)
+
 # MODULE
 add_library(
     test-async-module SHARED
