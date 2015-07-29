@@ -19,7 +19,6 @@
 #pragma once
 
 #include <convert.h>
-#include <internal/locker.h>
 
 #include <v8.h>
 
@@ -30,8 +29,6 @@ namespace v8cpp
 template <typename... Args>
 v8::Handle<v8::Value> call_v8(v8::Isolate* isolate, v8::Handle<v8::Function> func, Args... args)
 {
-    internal::Locker l(isolate);
-
     v8::EscapableHandleScope scope(isolate);
 
     int const arg_count = sizeof...(Args);

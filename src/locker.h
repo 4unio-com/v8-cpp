@@ -22,8 +22,6 @@
 
 namespace v8cpp
 {
-namespace internal
-{
 
 class Locker
 {
@@ -46,5 +44,19 @@ private:
     std::shared_ptr<v8::Context::Scope> context_scope_;
 };
 
-}  // namespace internal
+class Unlocker
+{
+public:
+    explicit Unlocker(v8::Isolate* isolate)
+    {
+        if (v8::Locker::IsActive() && v8::Locker::IsLocked(isolate))
+        {
+            unlocker_ = std::make_shared<v8::Unlocker>(isolate);
+        }
+    }
+
+private:
+    std::shared_ptr<v8::Unlocker> unlocker_;
+};
+
 }  // namespace v8cpp
