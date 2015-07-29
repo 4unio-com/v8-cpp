@@ -6,7 +6,6 @@ include_directories(
   ${TEST_INCLUDE_DIRS}
 )
 
-add_subdirectory(async)
 add_subdirectory(errors)
 add_subdirectory(functions)
 add_subdirectory(members)

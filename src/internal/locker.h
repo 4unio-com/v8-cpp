@@ -18,30 +18,33 @@
 
 #pragma once
 
-#include <convert.h>
-#include <internal/locker.h>
-
-#include <v8.h>
+#include <memory>
 
 namespace v8cpp
 {
-
-// Call a V8 function from C++
-template <typename... Args>
-v8::Handle<v8::Value> call_v8(v8::Isolate* isolate, v8::Handle<v8::Function> func, Args... args)
+namespace internal
 {
-    internal::Locker l(isolate);
 
-    v8::EscapableHandleScope scope(isolate);
+class Locker
+{
+public:
+    explicit Locker(v8::Isolate* isolate)
+    {
+        if (v8::Locker::IsActive() && !v8::Locker::IsLocked(isolate))
+        {
+            locker_ = std::make_shared<v8::Locker>(isolate);
+            isolate_scope_ = std::make_shared<v8::Isolate::Scope>(isolate);
+            handle_scope_ = std::make_shared<v8::HandleScope>(isolate);
+            context_scope_ = std::make_shared<v8::Context::Scope>(v8::Context::New(isolate));
+        }
+    }
 
-    int const arg_count = sizeof...(Args);
+private:
+    std::shared_ptr<v8::Locker> locker_;
+    std::shared_ptr<v8::Isolate::Scope> isolate_scope_;
+    std::shared_ptr<v8::HandleScope> handle_scope_;
+    std::shared_ptr<v8::Context::Scope> context_scope_;
+};
 
-    // +1 for when arg_count == 0
-    v8::Handle<v8::Value> v8_args[arg_count + 1] = {to_v8(isolate, args)...};
-
-    v8::Local<v8::Value> result = func->Call(isolate->GetCurrentContext()->Global(), arg_count, v8_args);
-
-    return scope.Escape(result);
-}
-
+}  // namespace internal
 }  // namespace v8cpp

@@ -28,7 +28,7 @@ namespace internal
 {
 
 using ModuleInitFunc = void(v8::Handle<v8::Object> exports);
-ModuleInitFunc* node_init_func_;
+///!ModuleInitFunc* node_init_func_;
 
 struct NodeModule
 {
@@ -40,21 +40,21 @@ struct NodeModule
     //...
 };
 
-extern "C" void node_module_register(void* m)
-{
-    auto mp = static_cast<NodeModule*>(m);
-
-    // For now we only know that version 14 works here
-    if (mp->nm_version == 14)
-    {
-        node_init_func_ = mp->nm_register_func;
-    }
-    else
-    {
-        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
-                  << std::endl;
-    }
-}
+///!extern "C" void node_module_register(void* m)
+///!{
+///!    auto mp = static_cast<NodeModule*>(m);
+///!
+///!    // For now we only know that version 14 works here
+///!    if (mp->nm_version == 14)
+///!    {
+///!        node_init_func_ = mp->nm_register_func;
+///!    }
+///!    else
+///!    {
+///!        std::cerr << "node_module_register(): ignoring node module. nm_version " << mp->nm_version << " not supported"
+///!                  << std::endl;
+///!    }
+///!}
 
 class Console
 {
@@ -112,7 +112,7 @@ public:
                 throw std::runtime_error("require() call missing string argument");
             }
 
-            node_init_func_ = nullptr;
+            ///!node_init_func_ = nullptr;
 
             // Try append ".node" to module_path
             std::string suffixed_module_path = this_->script_path_ + module_path + ".node";
@@ -136,12 +136,12 @@ public:
 
             v8::Local<v8::Object> exports = v8::Object::New(isolate);
 
-            if (node_init_func_)
-            {
-                node_init_func_(exports);
-            }
-            else
-            {
+            ///!if (node_init_func_)
+            ///!{
+            ///!    node_init_func_(exports);
+            ///!}
+            ///!else
+            ///!{
                 auto v8cpp_init_func = (ModuleInitFunc*)dlsym(module, "init_module");
                 if (!v8cpp_init_func)
                 {
@@ -149,7 +149,7 @@ public:
                 }
 
                 v8cpp_init_func(exports);
-            }
+            ///!}
 
             args.GetReturnValue().Set(scope.Escape(exports));
         }
