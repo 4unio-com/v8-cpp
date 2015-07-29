@@ -19,6 +19,7 @@
 #pragma once
 
 #include <internal/convert.h>
+#include <internal/locker.h>
 
 #include <v8.h>
 
