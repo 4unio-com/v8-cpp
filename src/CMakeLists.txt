@@ -21,8 +21,6 @@ target_link_libraries(
     v8_libbase
     v8_snapshot
 
-    uv
-
     dl
     pthread
 )
