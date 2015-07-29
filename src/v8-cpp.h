@@ -19,5 +19,6 @@
 #include <call.h>
 #include <class.h>
 #include <convert.h>
+#include <locker.h>
 #include <module.h>
 #include <run.h>

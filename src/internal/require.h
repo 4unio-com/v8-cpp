@@ -41,7 +41,7 @@ struct NodeModule
 };
 
 ///!extern "C" void node_module_register(void* m)
-///!
+///!{
 ///!    auto mp = static_cast<NodeModule*>(m);
 ///!
 ///!    // For now we only know that version 14 works here
