@@ -109,6 +109,11 @@ T run_script(std::string const& source, std::string const& filename = "")
         throw std::runtime_error(v8cpp::from_v8<std::string>(isolate.get(), try_catch.Message()->Get()));
     }
 
+    // Force garbage collection before returning
+    std::string const v8_flags = "--expose_gc";
+    v8::V8::SetFlagsFromString(v8_flags.data(), (int)v8_flags.length());
+    isolate.get()->RequestGarbageCollectionForTesting(v8::Isolate::GarbageCollectionType::kFullGarbageCollection);
+
     return v8cpp::from_v8<T>(isolate.get(), result);
 }
 
