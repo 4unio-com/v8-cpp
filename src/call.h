@@ -27,14 +27,14 @@ namespace v8cpp
 
 // Call a V8 function from C++
 template <typename... Args>
-v8::Handle<v8::Value> call_v8(v8::Isolate* isolate, v8::Handle<v8::Function> func, Args... args)
+v8::Local<v8::Value> call_v8(v8::Isolate* isolate, v8::Local<v8::Function> func, Args... args)
 {
     v8::EscapableHandleScope scope(isolate);
 
     int const arg_count = sizeof...(Args);
 
     // +1 for when arg_count == 0
-    v8::Handle<v8::Value> v8_args[arg_count + 1] = {to_v8(isolate, args)...};
+    v8::Local<v8::Value> v8_args[arg_count + 1] = {to_v8(isolate, args)...};
 
     v8::Local<v8::Value> result = func->Call(isolate->GetCurrentContext()->Global(), arg_count, v8_args);
 

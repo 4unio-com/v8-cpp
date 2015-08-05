@@ -58,14 +58,14 @@ public:
         return object_template_->NewInstance();
     }
 
-    inline v8::Handle<v8::ObjectTemplate> object_template()
+    inline v8::Local<v8::ObjectTemplate> object_template()
     {
         return object_template_;
     }
 
 private:
     v8::Isolate* isolate_;
-    v8::Handle<v8::ObjectTemplate> object_template_;
+    v8::Local<v8::ObjectTemplate> object_template_;
 };
 
 // Create a V8-cpp module by exposing it's init function
@@ -74,7 +74,7 @@ extern "C"\
 {\
     namespace v8cpp\
     {\
-        void init_module(Handle<Object> exports)\
+        void init_module(Local<Object> exports)\
         {\
             init_func(exports);\
         }\

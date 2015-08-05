@@ -43,14 +43,14 @@ struct Convert<std::basic_string<Char, Traits, Alloc>>
     static_assert(sizeof(Char) <= sizeof(uint16_t), "only UTF8 and UTF16 strings supported");
 
     using FromType = std::basic_string<Char, Traits, Alloc>;
-    using ToType = v8::Handle<v8::String>;
+    using ToType = v8::Local<v8::String>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsString();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -89,14 +89,14 @@ template <>
 struct Convert<bool>
 {
     using FromType = bool;
-    using ToType = v8::Handle<v8::Boolean>;
+    using ToType = v8::Local<v8::Boolean>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsBoolean();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -116,7 +116,7 @@ template <typename T>
 struct Convert<T, typename std::enable_if<std::is_integral<T>::value>::type>
 {
     using FromType = T;
-    using ToType = v8::Handle<v8::Number>;
+    using ToType = v8::Local<v8::Number>;
 
     enum
     {
@@ -124,12 +124,12 @@ struct Convert<T, typename std::enable_if<std::is_integral<T>::value>::type>
         is_signed = std::is_signed<T>::value
     };
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsNumber();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -182,12 +182,12 @@ struct Convert<T, typename std::enable_if<std::is_enum<T>::value>::type>
     using FromType = T;
     using ToType = typename Convert<UnderlyingType>::ToType;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsNumber();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -207,14 +207,14 @@ template <typename T>
 struct Convert<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
 {
     using FromType = T;
-    using ToType = v8::Handle<v8::Number>;
+    using ToType = v8::Local<v8::Number>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsNumber();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -235,14 +235,14 @@ template <typename T, typename Alloc>
 struct Convert<std::vector<T, Alloc>>
 {
     using FromType = std::vector<T, Alloc>;
-    using ToType = v8::Handle<v8::Array>;
+    using ToType = v8::Local<v8::Array>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsArray();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -280,14 +280,14 @@ template <typename Key, typename Value, typename Less, typename Alloc>
 struct Convert<std::map<Key, Value, Less, Alloc>>
 {
     using FromType = std::map<Key, Value, Less, Alloc>;
-    using ToType = v8::Handle<v8::Object>;
+    using ToType = v8::Local<v8::Object>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsObject();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -321,47 +321,24 @@ struct Convert<std::map<Key, Value, Less, Alloc>>
     }
 };
 
-// v8::Handle converter
-template <typename T>
-struct Convert<v8::Handle<T>>
-{
-    using FromType = v8::Handle<T>;
-    using ToType = v8::Handle<T>;
-
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
-    {
-        return !value.As<T>().IsEmpty();
-    }
-
-    static v8::Handle<T> from_v8(v8::Isolate*, v8::Handle<v8::Value> value)
-    {
-        return value.As<T>();
-    }
-
-    static v8::Handle<T> to_v8(v8::Isolate*, v8::Handle<T> value)
-    {
-        return value;
-    }
-};
-
 // v8::Local converter
 template <typename T>
 struct Convert<v8::Local<T>>
 {
-    using FromType = v8::Handle<T>;
-    using ToType = v8::Handle<T>;
+    using FromType = v8::Local<T>;
+    using ToType = v8::Local<T>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.As<T>().IsEmpty();
     }
 
-    static v8::Handle<T> from_v8(v8::Isolate*, v8::Handle<v8::Value> value)
+    static v8::Local<T> from_v8(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return value.As<T>();
     }
 
-    static v8::Handle<T> to_v8(v8::Isolate*, v8::Local<T> value)
+    static v8::Local<T> to_v8(v8::Isolate*, v8::Local<T> value)
     {
         return value;
     }
@@ -371,20 +348,20 @@ struct Convert<v8::Local<T>>
 template <typename T>
 struct Convert<v8::Persistent<T>>
 {
-    using FromType = v8::Handle<T>;
-    using ToType = v8::Handle<T>;
+    using FromType = v8::Local<T>;
+    using ToType = v8::Local<T>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.As<T>().IsEmpty();
     }
 
-    static v8::Handle<T> from_v8(v8::Isolate*, v8::Handle<v8::Value> value)
+    static v8::Local<T> from_v8(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return value.As<T>();
     }
 
-    static v8::Handle<T> to_v8(v8::Isolate*, v8::Persistent<T> value)
+    static v8::Local<T> to_v8(v8::Isolate*, v8::Persistent<T> value)
     {
         return value;
     }
@@ -393,11 +370,6 @@ struct Convert<v8::Persistent<T>>
 // Exported class converters
 template <typename T>
 struct IsExportedClass : std::is_class<T>
-{
-};
-
-template <typename T>
-struct IsExportedClass<v8::Handle<T>> : std::false_type
 {
 };
 
@@ -430,14 +402,14 @@ template <typename T>
 struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
 {
     using FromType = T&;
-    using ToType = v8::Handle<v8::Object>;
+    using ToType = v8::Local<v8::Object>;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsObject();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {
@@ -460,15 +432,15 @@ template <typename T>
 struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
 {
     using FromType = T*;
-    using ToType = v8::Handle<v8::Object>;
+    using ToType = v8::Local<v8::Object>;
     using ClassType = typename std::remove_cv<T>::type;
 
-    static bool is_valid(v8::Isolate*, v8::Handle<v8::Value> value)
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
         return !value.IsEmpty() && value->IsObject();
     }
 
-    static FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
     {
         if (!is_valid(isolate, value))
         {

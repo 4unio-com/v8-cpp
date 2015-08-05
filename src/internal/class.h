@@ -96,7 +96,7 @@ public:
         proto_template()->Inherit(base_class->class_template());
     }
 
-    v8::Handle<v8::Object> export_object(T* object)
+    v8::Local<v8::Object> export_object(T* object)
     {
         v8::EscapableHandleScope scope(isolate_);
 
@@ -117,12 +117,12 @@ public:
         return scope.Escape(v8_object);
     }
 
-    v8::Handle<v8::Object> export_object(T const* object)
+    v8::Local<v8::Object> export_object(T const* object)
     {
         return export_object(const_cast<T*>(object));
     }
 
-    v8::Handle<v8::Object> export_object(v8::FunctionCallbackInfo<v8::Value> const& args)
+    v8::Local<v8::Object> export_object(v8::FunctionCallbackInfo<v8::Value> const& args)
     {
         return constructor_ ? export_object(constructor_(args)) :
                               throw std::runtime_error("exported class does not have a constructor specified");
@@ -134,7 +134,7 @@ public:
 
         while (value->IsObject())
         {
-            v8::Handle<v8::Object> object = value->ToObject();
+            v8::Local<v8::Object> object = value->ToObject();
             if (object->InternalFieldCount() == 2)
             {
                 void* ptr = object->GetAlignedPointerFromInternalField(0);

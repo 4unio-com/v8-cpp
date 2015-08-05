@@ -87,7 +87,7 @@ SearchHandler* new_SearchHandler(Local<Function> const& cb)
     return new SearchHandler(cb);
 }
 
-void InitAll(Handle<Object> exports)
+void InitAll(Local<Object> exports)
 {
     Isolate* isolate = Isolate::GetCurrent();
 
