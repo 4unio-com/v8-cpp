@@ -78,7 +78,7 @@ public:
 
         v8::AccessorGetterCallback getter = &internal::Class<T>::template get_member<P>;
         v8::AccessorSetterCallback setter = &internal::Class<T>::template set_member<P>;
-        v8::Handle<v8::Value> data = internal::export_value(class_.isolate(), property);
+        v8::Local<v8::Value> data = internal::export_value(class_.isolate(), property);
 
         class_.class_template()->PrototypeTemplate()->SetAccessor(to_v8(class_.isolate(), name), getter, setter, data,
                                                                   v8::DEFAULT, v8::DontDelete);

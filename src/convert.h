@@ -30,21 +30,21 @@ namespace v8cpp
 {
 
 template <typename T>
-typename internal::Convert<T>::FromType from_v8(v8::Isolate* isolate, v8::Handle<v8::Value> value)
+typename internal::Convert<T>::FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
 {
     return internal::Convert<T>::from_v8(isolate, value);
 }
 
 template <typename T, typename U>
 typename internal::Convert<T>::FromType from_v8(v8::Isolate* isolate,
-                                                v8::Handle<v8::Value> value,
+                                                v8::Local<v8::Value> value,
                                                 U const& default_value)
 {
     return internal::Convert<T>::is_valid(isolate, value) ? internal::Convert<T>::from_v8(isolate, value) :
                                                             default_value;
 }
 
-inline v8::Handle<v8::String> to_v8(v8::Isolate* isolate, char const* str, int len = -1)
+inline v8::Local<v8::String> to_v8(v8::Isolate* isolate, char const* str, int len = -1)
 {
     return v8::String::NewFromUtf8(isolate, str, v8::String::kNormalString, len);
 }
@@ -55,13 +55,13 @@ typename internal::Convert<T>::ToType to_v8(v8::Isolate* isolate, T const& value
     return internal::Convert<T>::to_v8(isolate, value);
 }
 
-inline v8::Handle<v8::Value> to_v8(v8::Isolate* isolate, std::nullptr_t)
+inline v8::Local<v8::Value> to_v8(v8::Isolate* isolate, std::nullptr_t)
 {
     return v8::Null(isolate);
 }
 
 template <typename I>
-v8::Handle<v8::Array> to_v8(v8::Isolate* isolate, I begin, I end)
+v8::Local<v8::Array> to_v8(v8::Isolate* isolate, I begin, I end)
 {
     v8::EscapableHandleScope scope(isolate);
 

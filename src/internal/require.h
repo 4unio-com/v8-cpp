@@ -27,7 +27,7 @@ namespace v8cpp
 namespace internal
 {
 
-using ModuleInitFunc = void(v8::Handle<v8::Object> exports);
+using ModuleInitFunc = void(v8::Local<v8::Object> exports);
 ///!ModuleInitFunc* node_init_func_;
 
 struct NodeModule

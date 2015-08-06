@@ -26,7 +26,7 @@
 namespace v8cpp
 {
 
-template <typename T = v8::Handle<v8::Value>>
+template <typename T = v8::Local<v8::Value>>
 T run_script(std::string const& source, std::string const& filename = "")
 {
     // Create an isolate
@@ -72,7 +72,7 @@ T run_script(std::string const& source, std::string const& filename = "")
             script_path = filename.substr(0, found) + "/";
         }
 
-        v8::Handle<v8::Value> require = internal::export_value(isolate.get(), new internal::Require(script_path));
+        v8::Local<v8::Value> require = internal::export_value(isolate.get(), new internal::Require(script_path));
         module.object_template()->Set(isolate.get(), "require",
                                       v8::FunctionTemplate::New(isolate.get(), internal::Require::require, require));
 
@@ -117,7 +117,7 @@ T run_script(std::string const& source, std::string const& filename = "")
     return v8cpp::from_v8<T>(isolate.get(), result);
 }
 
-template <typename T = v8::Handle<v8::Value>>
+template <typename T = v8::Local<v8::Value>>
 T run_script_file(std::string const& filename)
 {
     std::ifstream stream(filename.c_str());

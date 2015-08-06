@@ -49,7 +49,7 @@ v8::Local<v8::Value> export_value(v8::Isolate* isolate, T const& value)
 }
 
 template <typename T>
-T import_value(v8::Handle<v8::Value> value)
+T import_value(v8::Local<v8::Value> value)
 {
     T* data = static_cast<T*>(value.As<v8::External>()->Value());
     return *data;
@@ -111,7 +111,7 @@ void forward_function(v8::FunctionCallbackInfo<v8::Value> const& args)
 
 // Export a C++ function to V8
 template <typename F>
-v8::Handle<v8::FunctionTemplate> export_function(v8::Isolate* isolate, F func)
+v8::Local<v8::FunctionTemplate> export_function(v8::Isolate* isolate, F func)
 {
     return v8::FunctionTemplate::New(isolate, &forward_function<F>, export_value(isolate, func));
 }
