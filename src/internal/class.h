@@ -22,6 +22,12 @@
 #include <internal/function.h>
 #include <internal/utility/object_factory.h>
 
+#include <memory>
+
+template <typename T> struct IsSharedPointer : std::false_type {};
+template <typename T> struct IsSharedPointer<std::shared_ptr<T>> : std::true_type { using type = T; };
+template <typename T> struct IsSharedPointer<std::shared_ptr<T const>> : std::true_type { using type = T; };
+
 namespace v8cpp
 {
 namespace internal
@@ -44,7 +50,7 @@ public:
         }
 
         // Find Class instance by class type
-        size_t my_type = class_type_();
+        size_t my_type = class_type();
         Class* result;
         if (my_type < instances->size())
         {
@@ -96,7 +102,43 @@ public:
         proto_template()->Inherit(base_class->class_template());
     }
 
-    v8::Local<v8::Object> export_object(T* object)
+    template <typename O>
+    typename std::enable_if<IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object, bool gc)
+    {
+        v8::EscapableHandleScope scope(isolate_);
+
+        v8::Local<v8::Object> v8_object = Class<typename IsSharedPointer<T>::type>::instance(isolate_).class_template()->GetFunction()->NewInstance();
+        v8_object->SetAlignedPointerInInternalField(0, object->get());
+        v8_object->SetAlignedPointerInInternalField(1, &Class<typename IsSharedPointer<T>::type>::instance(isolate_));
+        v8_object->SetAlignedPointerInInternalField(2, object);
+
+        MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
+        if (gc)
+        {
+            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
+                                {
+                                    v8::Isolate* isolate = data.GetIsolate();
+                                    T* object = data.GetParameter();
+                                    Class<typename IsSharedPointer<T>::type>::instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
+                                });
+        }
+        else
+        {
+            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
+                                {
+                                    v8::Isolate* isolate = data.GetIsolate();
+                                    T* object = data.GetParameter();
+                                    Class<typename IsSharedPointer<T>::type>::instance(isolate).remove_object<T>(isolate, object, nullptr);
+                                });
+        }
+
+        Class<typename IsSharedPointer<T>::type>::instance(isolate_).add_object(object, std::move(v8_object_p));
+
+        return scope.Escape(v8_object);
+    }
+
+    template <typename O>
+    typename std::enable_if<!IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object, bool gc)
     {
         v8::EscapableHandleScope scope(isolate_);
 
@@ -105,41 +147,76 @@ public:
         v8_object->SetAlignedPointerInInternalField(1, this);
 
         MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
-        v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                            {
-                                v8::Isolate* isolate = data.GetIsolate();
-                                T* object = data.GetParameter();
-                                instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
-                            });
+        if (gc)
+        {
+            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
+                                {
+                                    v8::Isolate* isolate = data.GetIsolate();
+                                    T* object = data.GetParameter();
+                                    instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
+                                });
+        }
+        else
+        {
+            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
+                                {
+                                    v8::Isolate* isolate = data.GetIsolate();
+                                    T* object = data.GetParameter();
+                                    instance(isolate).remove_object<T>(isolate, object, nullptr);
+                                });
+        }
 
-        ClassInfo::add_object(object, std::move(v8_object_p));
+        add_object(object, std::move(v8_object_p));
 
         return scope.Escape(v8_object);
     }
 
-    v8::Local<v8::Object> export_object(T const* object)
+    v8::Local<v8::Object> export_object(T const* object, bool gc)
     {
-        return export_object(const_cast<T*>(object));
+        return export_object(const_cast<T*>(object), gc);
     }
 
     v8::Local<v8::Object> export_object(v8::FunctionCallbackInfo<v8::Value> const& args)
     {
-        return constructor_ ? export_object(constructor_(args)) :
+        return constructor_ ? export_object(constructor_(args), true) :
                               throw std::runtime_error("exported class does not have a constructor specified");
     }
 
-    T* import_object(v8::Local<v8::Value> value)
+    template <typename O>
+    typename std::enable_if<IsSharedPointer<O>::value, O*>::type import_object(v8::Local<v8::Value> value)
     {
         v8::HandleScope scope(isolate_);
 
         while (value->IsObject())
         {
             v8::Local<v8::Object> object = value->ToObject();
-            if (object->InternalFieldCount() == 2)
+            if (object->InternalFieldCount() == 3)
             {
                 void* ptr = object->GetAlignedPointerFromInternalField(0);
                 ClassInfo* info = static_cast<ClassInfo*>(object->GetAlignedPointerFromInternalField(1));
-                if (info && info->cast(ptr, class_type_()))
+                if (info && info->cast(ptr, Class<typename IsSharedPointer<T>::type>::instance(isolate_).class_type()))
+                {
+                    return static_cast<T*>(object->GetAlignedPointerFromInternalField(2));
+                }
+            }
+            value = object->GetPrototype();
+        }
+        return nullptr;
+    }
+
+    template <typename O>
+    typename std::enable_if<!IsSharedPointer<O>::value, O*>::type import_object(v8::Local<v8::Value> value)
+    {
+        v8::HandleScope scope(isolate_);
+
+        while (value->IsObject())
+        {
+            v8::Local<v8::Object> object = value->ToObject();
+            if (object->InternalFieldCount() == 3)
+            {
+                void* ptr = object->GetAlignedPointerFromInternalField(0);
+                ClassInfo* info = static_cast<ClassInfo*>(object->GetAlignedPointerFromInternalField(1));
+                if (info && info->cast(ptr, class_type()))
                 {
                     return static_cast<T*>(ptr);
                 }
@@ -172,6 +249,12 @@ public:
         self.*property_ptr = from_v8<PropType>(isolate, value);
     }
 
+    static size_t class_type()
+    {
+        static size_t my_type = ClassInfo::register_class();
+        return my_type;
+    }
+
 private:
     explicit Class(v8::Isolate* isolate, size_t type)
         : ClassInfo(type)
@@ -200,13 +283,8 @@ private:
 
         // Each JS instance has a built-in field holding a pointer to the C++ object
         // We add a second field to hold a pointer to this Class instance
-        class_template->InstanceTemplate()->SetInternalFieldCount(2);
-    }
-
-    static size_t class_type_()
-    {
-        static size_t my_type = ClassInfo::register_class();
-        return my_type;
+        // And an optional third field to hold a smart pointer if the Class instance is one
+        class_template->InstanceTemplate()->SetInternalFieldCount(3);
     }
 
     v8::Isolate* isolate_;

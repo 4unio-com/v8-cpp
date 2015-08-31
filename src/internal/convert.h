@@ -403,6 +403,7 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
 {
     using FromType = T&;
     using ToType = v8::Local<v8::Object>;
+    using ClassType = typename std::remove_cv<T>::type;
 
     static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
@@ -424,7 +425,7 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
 
     static ToType to_v8(v8::Isolate* isolate, T const& value)
     {
-        return Convert<T*>::to_v8(isolate, new T(value));
+        return Class<ClassType>::instance(isolate).export_object(new T(value), true);
     }
 };
 
@@ -446,12 +447,12 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
         {
             throw std::invalid_argument("expected an object");
         }
-        return Class<ClassType>::instance(isolate).import_object(value);
+        return Class<ClassType>::instance(isolate).template import_object<T>(value);
     }
 
     static ToType to_v8(v8::Isolate* isolate, T const* value)
     {
-        return Class<ClassType>::instance(isolate).export_object(value);
+        return Class<ClassType>::instance(isolate).export_object(value, false);
     }
 };
 

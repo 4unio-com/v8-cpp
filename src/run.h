@@ -32,6 +32,11 @@ T run_script(std::string const& source, std::string const& filename = "")
     // Create an isolate
     std::shared_ptr<v8::Isolate> isolate(v8::Isolate::New(), [](v8::Isolate* isolate)
     {
+        // Force garbage collection before returning
+        std::string const v8_flags = "--expose_gc";
+        v8::V8::SetFlagsFromString(v8_flags.data(), (int)v8_flags.length());
+        isolate->RequestGarbageCollectionForTesting(v8::Isolate::GarbageCollectionType::kFullGarbageCollection);
+
         // Clean up
         using ClassInstances = std::vector<v8cpp::internal::Class<void>*>;
         ClassInstances* instances = static_cast<ClassInstances*>(isolate->GetData(0));
