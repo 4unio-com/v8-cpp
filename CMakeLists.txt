@@ -1,5 +1,19 @@
 cmake_minimum_required(VERSION 2.8)
 
+# Retrieve dependencies
+
+message(STATUS "Retrieving deps")
+
+execute_process(
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/deps/get-deps.sh
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  RESULT_VARIABLE _DEPS_RESULT
+  )
+
+if(NOT _DEPS_RESULT EQUAL 0)
+  message(FATAL_ERROR "Retrieving deps failed")
+endif()
+
 # Configure project environment
 
 project(v8-cpp CXX)
