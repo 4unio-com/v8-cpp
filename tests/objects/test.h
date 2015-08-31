@@ -20,6 +20,8 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 class EmbeddedTestClass
 {
 public:
@@ -43,7 +45,7 @@ class TestClass
 {
 public:
     TestClass(int a, int b)
-        : embedded_class_(a, b)
+        : embedded_class_(std::make_shared<EmbeddedTestClass>(a, b))
     {
         EXPECT_EQ(a, 1);
         EXPECT_EQ(b, 2);
@@ -55,19 +57,24 @@ public:
         return i_;
     }
 
+    std::shared_ptr<EmbeddedTestClass> embedded_class_sptr()
+    {
+        return embedded_class_;
+    }
+
     EmbeddedTestClass* embedded_class_ptr()
     {
-        return &embedded_class_;
+        return embedded_class_.get();
     }
 
     EmbeddedTestClass& embedded_class_ref()
     {
-        return embedded_class_;
+        return *embedded_class_;
     }
 
     EmbeddedTestClass embedded_class_copy()
     {
-        return embedded_class_;
+        return *embedded_class_;
     }
 
     void replace_i(EmbeddedTestClass const& other)
@@ -81,7 +88,7 @@ public:
     }
 
 private:
-    EmbeddedTestClass embedded_class_;
+    std::shared_ptr<EmbeddedTestClass> embedded_class_;
     int i_;
 };
 

@@ -109,7 +109,7 @@ public:
                             {
                                 v8::Isolate* isolate = data.GetIsolate();
                                 T* object = data.GetParameter();
-                                instance(isolate).destroy_object(object);
+                                instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
                             });
 
         ClassInfo::add_object(object, std::move(v8_object_p));
@@ -147,11 +147,6 @@ public:
             value = object->GetPrototype();
         }
         return nullptr;
-    }
-
-    void destroy_object(T* object)
-    {
-        ClassInfo::remove_object(isolate_, object, &ObjectFactory<T>::delete_object);
     }
 
     template <typename P>

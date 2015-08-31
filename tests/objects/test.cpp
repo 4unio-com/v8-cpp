@@ -28,83 +28,103 @@
 // move/ref objects to JS
 // move/ref objects back to C++
 
-TEST(Test, construct_class_via_new)
-{
-    auto test_object = v8cpp::run_script<TestClass>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = new module.TestClass(1, 2);
-        test_object;
-    )");
+//TEST(Test, construct_class_via_new)
+//{
+//    auto test_object = v8cpp::run_script<TestClass>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = new module.TestClass(1, 2);
+//        test_object;
+//    )");
 
-    EXPECT_EQ(test_object.i(), 3);
-}
+//    EXPECT_EQ(test_object.i(), 3);
+//}
 
-TEST(Test, construct_class_via_factory)
-{
-    auto test_object = v8cpp::run_script<TestClass>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-        test_object;
-    )");
+//TEST(Test, construct_class_via_factory)
+//{
+//    auto test_object = v8cpp::run_script<TestClass>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        test_object;
+//    )");
 
-    EXPECT_EQ(test_object.i(), 3);
-}
+//    EXPECT_EQ(test_object.i(), 3);
+//}
 
-TEST(Test, object_to_js)
-{
-    auto test_object = v8cpp::run_script<EmbeddedTestClass*>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-        test_object.embedded_class_ptr();
-    )");
+//TEST(Test, object_to_js)
+//{
+//    auto test_object = v8cpp::run_script<std::shared_ptr<EmbeddedTestClass>>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        test_object.embedded_class_sptr();
+//    )");
 
-    EXPECT_EQ(test_object->i(), -1);
+//    EXPECT_EQ(test_object->i(), -1);
 
-    auto test_object2 = v8cpp::run_script<EmbeddedTestClass&>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-        test_object.embedded_class_ref();
-    )");
+//    auto test_object2 = v8cpp::run_script<EmbeddedTestClass*>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        test_object.embedded_class_ptr();
+//    )");
 
-    EXPECT_EQ(test_object2.i(), -1);
+//    EXPECT_EQ(test_object2->i(), -1);
 
-    auto test_object3 = v8cpp::run_script<EmbeddedTestClass>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-        test_object.embedded_class_copy();
-    )");
+//    auto test_object3 = v8cpp::run_script<EmbeddedTestClass&>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        test_object.embedded_class_ref();
+//    )");
 
-    EXPECT_EQ(test_object3.i(), -1);
-}
+//    EXPECT_EQ(test_object3.i(), -1);
+
+//    auto test_object4 = v8cpp::run_script<EmbeddedTestClass>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        test_object.embedded_class_copy();
+//    )");
+
+//    EXPECT_EQ(test_object4.i(), -1);
+//}
 
 TEST(Test, object_from_js)
 {
-    auto test_object = v8cpp::run_script<TestClass>(
+//    auto test_object = v8cpp::run_script<TestClass>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        var test_object2 = module.new_TestClass(1, 2);
+
+//        test_object.replace_i(test_object2.embedded_class_copy());
+//        test_object;
+//    )");
+
+//    EXPECT_EQ(test_object.i(), -1);
+
+//    auto result = v8cpp::run_script<int>(
+//    R"(
+//        var module = require("./test-objects-module");
+//        var test_object = module.new_TestClass(1, 2);
+//        var test_object2 = module.new_TestClass(1, 2);
+
+//        test_object.add_i(test_object.embedded_class_ptr(),
+//                          test_object2.embedded_class_ref());
+//    )");
+
+//    EXPECT_EQ(result, -2);
+
+    auto result2 = v8cpp::run_script<int>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
-        var test_object2 = module.new_TestClass(1, 2);
 
-        test_object.replace_i(test_object2.embedded_class_copy());
-        test_object;
+        var embedded_object = test_object.embedded_class_sptr();
+        embedded_object.i();
     )");
 
-    EXPECT_EQ(test_object.i(), -1);
-
-    auto result = v8cpp::run_script<int>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-        var test_object2 = module.new_TestClass(1, 2);
-
-        test_object.add_i(test_object.embedded_class_ptr(),
-                          test_object2.embedded_class_ref());
-    )");
-
-    EXPECT_EQ(result, -2);
+    EXPECT_EQ(result2, -1);
 }
