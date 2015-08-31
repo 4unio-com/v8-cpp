@@ -20,7 +20,6 @@
 
 #include <internal/utility/moveable_persistent.h>
 
-#include <assert.h>
 #include <algorithm>
 #include <unordered_map>
 
@@ -90,7 +89,6 @@ public:
     template <typename T>
     void add_object(T* object, MoveablePersistent<v8::Object>&& handle)
     {
-        assert(objects_.find(object) == objects_.end() && "object already exists");
         objects_.emplace(object, std::move(handle));
     }
 
@@ -98,7 +96,6 @@ public:
     void remove_object(v8::Isolate* isolate, T* object, void (*destroy)(v8::Isolate*, T*))
     {
         auto it = objects_.find(object);
-        assert(objects_.find(object) != objects_.end() && "object does not exist");
         if (it != objects_.end())
         {
             it->second.Reset();
