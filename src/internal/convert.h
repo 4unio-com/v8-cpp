@@ -424,8 +424,8 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
     template <typename O>
     static typename std::enable_if<IsUniquePointer<O>::value, ToType>::type to_v8(v8::Isolate* isolate, O const& value)
     {
-        std::shared_ptr<typename IsUniquePointer<O>::type> s_ptr{std::move(const_cast<T&>(value))};
-        return Convert<std::shared_ptr<typename IsUniquePointer<O>::type>>::to_v8(isolate, s_ptr);
+        std::shared_ptr<typename IsUniquePointer<T>::type> s_ptr{std::move(const_cast<T&>(value))};
+        return Convert<std::shared_ptr<typename IsUniquePointer<T>::type>>::to_v8(isolate, s_ptr);
     }
 
     template <typename O>
