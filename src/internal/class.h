@@ -273,7 +273,7 @@ private:
 
         // Each JS instance has a built-in field holding a pointer to the C++ object
         // We add a second field to hold a pointer to this Class instance
-        // And an optional third field to hold a smart pointer if the Class instance is one
+        // And an optional third field to hold a smart pointer
         class_template->InstanceTemplate()->SetInternalFieldCount(3);
     }
 
