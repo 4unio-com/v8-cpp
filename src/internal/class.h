@@ -103,7 +103,7 @@ public:
     }
 
     template <typename O>
-    typename std::enable_if<IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object, bool gc)
+    typename std::enable_if<IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object, bool)
     {
         v8::EscapableHandleScope scope(isolate_);
 
@@ -114,24 +114,12 @@ public:
         v8_object->SetAlignedPointerInInternalField(2, object);
 
         MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
-        if (gc)
-        {
-            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                                {
-                                    v8::Isolate* isolate = data.GetIsolate();
-                                    T* object = data.GetParameter();
-                                    raw_ptr_class::instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
-                                });
-        }
-        else
-        {
-            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                                {
-                                    v8::Isolate* isolate = data.GetIsolate();
-                                    T* object = data.GetParameter();
-                                    raw_ptr_class::instance(isolate).remove_object<T>(isolate, object, nullptr);
-                                });
-        }
+        v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
+                            {
+                                v8::Isolate* isolate = data.GetIsolate();
+                                T* object = data.GetParameter();
+                                raw_ptr_class::instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
+                            });
 
         raw_ptr_class::instance(isolate_).add_object(object, std::move(v8_object_p));
 
