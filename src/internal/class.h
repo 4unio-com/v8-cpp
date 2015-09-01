@@ -107,9 +107,10 @@ public:
     {
         v8::EscapableHandleScope scope(isolate_);
 
-        v8::Local<v8::Object> v8_object = Class<typename IsSharedPointer<T>::type>::instance(isolate_).class_template()->GetFunction()->NewInstance();
+        using raw_ptr_class = Class<typename IsSharedPointer<T>::type>;
+        v8::Local<v8::Object> v8_object = raw_ptr_class::instance(isolate_).class_template()->GetFunction()->NewInstance();
         v8_object->SetAlignedPointerInInternalField(0, object->get());
-        v8_object->SetAlignedPointerInInternalField(1, &Class<typename IsSharedPointer<T>::type>::instance(isolate_));
+        v8_object->SetAlignedPointerInInternalField(1, &raw_ptr_class::instance(isolate_));
         v8_object->SetAlignedPointerInInternalField(2, object);
 
         MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
@@ -119,7 +120,7 @@ public:
                                 {
                                     v8::Isolate* isolate = data.GetIsolate();
                                     T* object = data.GetParameter();
-                                    Class<typename IsSharedPointer<T>::type>::instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
+                                    raw_ptr_class::instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
                                 });
         }
         else
@@ -128,11 +129,11 @@ public:
                                 {
                                     v8::Isolate* isolate = data.GetIsolate();
                                     T* object = data.GetParameter();
-                                    Class<typename IsSharedPointer<T>::type>::instance(isolate).remove_object<T>(isolate, object, nullptr);
+                                    raw_ptr_class::instance(isolate).remove_object<T>(isolate, object, nullptr);
                                 });
         }
 
-        Class<typename IsSharedPointer<T>::type>::instance(isolate_).add_object(object, std::move(v8_object_p));
+        raw_ptr_class::instance(isolate_).add_object(object, std::move(v8_object_p));
 
         return scope.Escape(v8_object);
     }
@@ -145,6 +146,7 @@ public:
         v8::Local<v8::Object> v8_object = class_template()->GetFunction()->NewInstance();
         v8_object->SetAlignedPointerInInternalField(0, object);
         v8_object->SetAlignedPointerInInternalField(1, this);
+        v8_object->SetAlignedPointerInInternalField(2, nullptr);
 
         MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
         if (gc)

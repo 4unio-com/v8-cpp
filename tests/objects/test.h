@@ -64,7 +64,7 @@ public:
 
     std::unique_ptr<EmbeddedTestClass> embedded_class_uptr()
     {
-        return std::unique_ptr<EmbeddedTestClass>(embedded_class_.get());
+        return std::unique_ptr<EmbeddedTestClass>(new EmbeddedTestClass(1, 2));
     }
 
     EmbeddedTestClass* embedded_class_ptr()
