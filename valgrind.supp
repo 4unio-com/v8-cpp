@@ -21,7 +21,8 @@
    GC not cleaning up exported objects (via to_v8)
    Memcheck:Leak
    fun:_Znwm
-   fun:_ZN5v8cpp8internal7Convert*to_v8EPN2v87IsolateERKS2_
+   fun:_ZN5v8cpp8internal7Convert*to_v8*
+   ...
    fun:_ZN5v8cpp5to_v8*
    fun:_ZN5v8cpp8internal14forward_invoke*
    fun:_ZN5v8cpp8internal16forward_function*

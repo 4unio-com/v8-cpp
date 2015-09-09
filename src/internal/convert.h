@@ -21,6 +21,7 @@
 #include <climits>
 #include <vector>
 #include <map>
+#include <memory>
 
 #include <v8.h>
 
@@ -369,40 +370,38 @@ struct Convert<v8::Persistent<T>>
 
 // Exported class converters
 template <typename T>
-struct IsExportedClass : std::is_class<T>
-{
-};
+struct IsExportedClass : std::is_class<T> {};
 
 template <typename T>
-struct IsExportedClass<v8::Local<T>> : std::false_type
-{
-};
+struct IsExportedClass<v8::Local<T>> : std::false_type {};
 
 template <typename T>
-struct IsExportedClass<v8::Persistent<T>> : std::false_type
-{
-};
+struct IsExportedClass<v8::Persistent<T>> : std::false_type {};
 
 template <typename Char, typename Traits, typename Alloc>
-struct IsExportedClass<std::basic_string<Char, Traits, Alloc>> : std::false_type
-{
-};
+struct IsExportedClass<std::basic_string<Char, Traits, Alloc>> : std::false_type {};
 
 template <typename T, typename Alloc>
-struct IsExportedClass<std::vector<T, Alloc>> : std::false_type
-{
-};
+struct IsExportedClass<std::vector<T, Alloc>> : std::false_type {};
 
 template <typename Key, typename Value, typename Less, typename Alloc>
-struct IsExportedClass<std::map<Key, Value, Less, Alloc>> : std::false_type
-{
-};
+struct IsExportedClass<std::map<Key, Value, Less, Alloc>> : std::false_type {};
+
+template <typename T>
+struct IsUniquePointer : std::false_type {};
+
+template <typename T>
+struct IsUniquePointer<std::unique_ptr<T>> : std::true_type { using type = T; };
+
+template <typename T>
+struct IsUniquePointer<std::unique_ptr<T const>> : std::true_type { using type = T; };
 
 template <typename T>
 struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
 {
     using FromType = T&;
     using ToType = v8::Local<v8::Object>;
+    using ClassType = typename std::remove_cv<T>::type;
 
     static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
@@ -422,9 +421,18 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
         throw std::runtime_error("expected an exported object");
     }
 
-    static ToType to_v8(v8::Isolate* isolate, T const& value)
+    template <typename O>
+    static typename std::enable_if<IsUniquePointer<O>::value, ToType>::type to_v8(v8::Isolate* isolate, O const& value)
     {
-        return Convert<T*>::to_v8(isolate, new T(value));
+        // Convert unique pointers to shared pointers before exposing them to v8
+        std::shared_ptr<typename IsUniquePointer<T>::type> s_ptr{std::move(const_cast<T&>(value))};
+        return Convert<std::shared_ptr<typename IsUniquePointer<T>::type>>::to_v8(isolate, s_ptr);
+    }
+
+    template <typename O>
+    static typename std::enable_if<!IsUniquePointer<O>::value, ToType>::type to_v8(v8::Isolate* isolate, O const& value)
+    {
+        return Class<ClassType>::instance(isolate).export_object(new T(value), true);
     }
 };
 
@@ -446,12 +454,12 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
         {
             throw std::invalid_argument("expected an object");
         }
-        return Class<ClassType>::instance(isolate).import_object(value);
+        return Class<ClassType>::instance(isolate).template import_object<T>(value);
     }
 
     static ToType to_v8(v8::Isolate* isolate, T const* value)
     {
-        return Class<ClassType>::instance(isolate).export_object(value);
+        return Class<ClassType>::instance(isolate).export_object(value, false);
     }
 };
 
