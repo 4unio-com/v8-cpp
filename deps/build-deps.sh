@@ -19,4 +19,5 @@ cache_dir = None'
 gclient sync
 
 cd v8
+git apply $DIR/patches/v8/*.patch
 make -j3 native i18nsupport=off
