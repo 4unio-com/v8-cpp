@@ -27,7 +27,7 @@ namespace v8cpp
 
 // Call a V8 function from C++
 template <typename... Args>
-v8::Local<v8::Value> call_v8(v8::Isolate* isolate, v8::Local<v8::Function> func, Args... args)
+v8::Local<v8::Value> call_v8_with_receiver(v8::Isolate* isolate, v8::Local<v8::Object> receiver, v8::Local<v8::Function> func, Args... args)
 {
     v8::EscapableHandleScope scope(isolate);
 
@@ -36,9 +36,16 @@ v8::Local<v8::Value> call_v8(v8::Isolate* isolate, v8::Local<v8::Function> func,
     // +1 for when arg_count == 0
     v8::Local<v8::Value> v8_args[arg_count + 1] = {to_v8(isolate, args)...};
 
-    v8::Local<v8::Value> result = func->Call(isolate->GetCurrentContext()->Global(), arg_count, v8_args);
+    v8::Local<v8::Value> result = func->Call(receiver, arg_count, v8_args);
 
     return scope.Escape(result);
+}
+
+// Call a V8 function from C++
+template <typename... Args>
+v8::Local<v8::Value> call_v8(v8::Isolate* isolate, v8::Local<v8::Function> func, Args... args)
+{
+  return call_v8_with_receiver(isolate, isolate->GetCurrentContext()->Global(), func, args...);
 }
 
 }  // namespace v8cpp
