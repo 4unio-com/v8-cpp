@@ -43,6 +43,23 @@ TEST(Test, call_to_js)
     EXPECT_EQ(callback_result, "hello world");
 }
 
+TEST(Test, call_to_js_with_self)
+{
+    auto callback_result = v8cpp::run_script<std::string>(
+    R"(
+        var module = require("./test-functions-module");
+
+        var caller = new module.TestCaller(function() {})
+
+        var s = caller.get_shared()
+        caller.call_me_with_shared(s, function() {
+            return this.get_value()
+        });
+    )");
+
+    EXPECT_EQ(callback_result, "hello");
+}
+
 TEST(Test, call_from_js)
 {
     auto result = v8cpp::run_script<std::string>(

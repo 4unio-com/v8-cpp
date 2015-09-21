@@ -22,6 +22,15 @@
 
 #include <v8-cpp.h>
 
+class Shared
+{
+public:
+    std::string get_value() const
+    {
+      return std::string("hello");
+    }
+};
+
 class TestCaller
 {
 public:
@@ -35,6 +44,19 @@ public:
         v8::Local<v8::Function> cb = v8cpp::to_local<v8::Function>(v8::Isolate::GetCurrent(), cb_);
         auto result = v8cpp::call_v8(v8::Isolate::GetCurrent(), cb, "hello");
         return v8cpp::from_v8<std::string>(v8::Isolate::GetCurrent(), result);
+    }
+
+    std::shared_ptr<Shared> get_shared()
+    {
+        auto s = std::shared_ptr<Shared>(new Shared());
+        return s;
+    }
+
+    v8::Local<v8::Value>
+      call_me_with_shared(v8::Local<v8::Object> receiver,
+                          v8::Local<v8::Function> to_be_called_with_shared)
+    {
+        return v8cpp::call_v8_with_receiver(v8::Isolate::GetCurrent(), receiver, to_be_called_with_shared);
     }
 
 private:

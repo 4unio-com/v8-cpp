@@ -31,12 +31,19 @@ void InitAll(Local<Object> exports)
     v8cpp::Class<TestCaller> testcaller(isolate);
     testcaller
             .set_constructor<Local<Function>>()
+            .add_method("get_shared", &TestCaller::get_shared)
+            .add_method("call_me_with_shared", &TestCaller::call_me_with_shared)
             .add_method("call_me", &TestCaller::call_me);
 
+    // Prepare Shared binding
+    v8cpp::Class<Shared> shared(isolate);
+    shared.add_method("get_value", &Shared::get_value);
+    
     // Prepare module
     v8cpp::Module module(isolate);
 
     module.add_class("TestCaller", testcaller);
+    module.add_class("Shared", shared);
     module.add_function("simple_function", &simple_function);
     module.add_function("complex_function", &complex_function);
 
