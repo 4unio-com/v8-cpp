@@ -109,7 +109,7 @@ public:
 
         using raw_ptr_class = Class<typename IsSharedPointer<T>::type>;
         v8::Local<v8::Object> v8_object = raw_ptr_class::instance(isolate_).class_template()->GetFunction()->NewInstance();
-        v8_object->SetAlignedPointerInInternalField(0, object->get());
+        v8_object->SetAlignedPointerInInternalField(0, (void *) object->get());
         v8_object->SetAlignedPointerInInternalField(1, &raw_ptr_class::instance(isolate_));
         v8_object->SetAlignedPointerInInternalField(2, object);
 

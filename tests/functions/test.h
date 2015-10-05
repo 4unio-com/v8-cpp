@@ -46,9 +46,9 @@ public:
         return v8cpp::from_v8<std::string>(v8::Isolate::GetCurrent(), result);
     }
 
-    std::shared_ptr<Shared> get_shared()
+    std::shared_ptr<const Shared> get_shared()
     {
-        auto s = std::shared_ptr<Shared>(new Shared());
+        auto s = std::shared_ptr<const Shared>(new Shared());
         return s;
     }
 
