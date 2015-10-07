@@ -432,7 +432,7 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
     template <typename O>
     static typename std::enable_if<!IsUniquePointer<O>::value, ToType>::type to_v8(v8::Isolate* isolate, O const& value)
     {
-        return Class<ClassType>::instance(isolate).export_object(new T(value), true);
+        return Class<ClassType>::instance(isolate).export_object(new T(value));
     }
 };
 
@@ -459,7 +459,7 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
 
     static ToType to_v8(v8::Isolate* isolate, T const* value)
     {
-        return Class<ClassType>::instance(isolate).export_object(value, false);
+        return Class<ClassType>::instance(isolate).export_object(value);
     }
 };
 

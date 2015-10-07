@@ -103,7 +103,7 @@ public:
     }
 
     template <typename O>
-    typename std::enable_if<IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object, bool)
+    typename std::enable_if<IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object)
     {
         v8::EscapableHandleScope scope(isolate_);
 
@@ -127,48 +127,41 @@ public:
     }
 
     template <typename O>
-    typename std::enable_if<!IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object, bool gc)
+    typename std::enable_if<!IsSharedPointer<O>::value, v8::Local<v8::Object>>::type export_object(O* object)
     {
         v8::EscapableHandleScope scope(isolate_);
 
+        auto object_sptr = new std::shared_ptr<T>(object);
         v8::Local<v8::Object> v8_object = class_template()->GetFunction()->NewInstance();
         v8_object->SetAlignedPointerInInternalField(0, object);
         v8_object->SetAlignedPointerInInternalField(1, this);
-        v8_object->SetAlignedPointerInInternalField(2, nullptr);
+        v8_object->SetAlignedPointerInInternalField(2, object_sptr);
 
         MoveablePersistent<v8::Object> v8_object_p(isolate_, v8_object);
-        if (gc)
-        {
-            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                                {
-                                    v8::Isolate* isolate = data.GetIsolate();
-                                    T* object = data.GetParameter();
-                                    instance(isolate).remove_object<T>(isolate, object, &ObjectFactory<T>::delete_object);
-                                });
-        }
-        else
-        {
-            v8_object_p.SetWeak(object, [](v8::WeakCallbackData<v8::Object, T> const& data)
-                                {
-                                    v8::Isolate* isolate = data.GetIsolate();
-                                    T* object = data.GetParameter();
-                                    instance(isolate).remove_object<T>(isolate, object, nullptr);
-                                });
-        }
+        v8_object_p.SetWeak(object_sptr, [](v8::WeakCallbackData<v8::Object, std::shared_ptr<T>> const& data)
+                            {
+                                v8::Isolate* isolate = data.GetIsolate();
+
+                                std::shared_ptr<T>* object_sptr = data.GetParameter();
+                                instance(isolate).remove_object<std::shared_ptr<T>>(isolate, object_sptr, &ObjectFactory<std::shared_ptr<T>>::delete_object);
+
+                                T* object = object_sptr->get();
+                                instance(isolate).remove_object<T>(isolate, object, nullptr);
+                            });
 
         add_object(object, std::move(v8_object_p));
 
         return scope.Escape(v8_object);
     }
 
-    v8::Local<v8::Object> export_object(T const* object, bool gc)
+    v8::Local<v8::Object> export_object(T const* object)
     {
-        return export_object(const_cast<T*>(object), gc);
+        return export_object(const_cast<T*>(object));
     }
 
     v8::Local<v8::Object> export_object(v8::FunctionCallbackInfo<v8::Value> const& args)
     {
-        return constructor_ ? export_object(constructor_(args), true) :
+        return constructor_ ? export_object(constructor_(args)) :
                               throw std::runtime_error("exported class does not have a constructor specified");
     }
 
