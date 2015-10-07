@@ -1,26 +1,28 @@
-find_package(Node REQUIRED)
+find_package(Node)
 
-include_directories(
-    ${NODE_INCLUDE_DIRS}
-)
+if (NODE_FOUND)
+    include_directories(
+        ${NODE_INCLUDE_DIRS}
+    )
 
-file(
-    GLOB
-    EXAMPLE_FILES
-    *.h *.cpp *.js
-)
+    file(
+        GLOB
+        EXAMPLE_FILES
+        *.h *.cpp *.js
+    )
 
-configure_file(example.js example.js)
+    configure_file(example.js example.js)
 
-add_library(
-    v8-cpp-example SHARED
-    ${EXAMPLE_FILES}
-)
+    add_library(
+        v8-cpp-example SHARED
+        ${EXAMPLE_FILES}
+    )
 
-# This line sets the output binary name to "v8-cpp-example.node"
-set_target_properties(
-    v8-cpp-example
-    PROPERTIES
-    PREFIX ""
-    SUFFIX ".node"
-)
+    # This line sets the output binary name to "v8-cpp-example.node"
+    set_target_properties(
+        v8-cpp-example
+        PROPERTIES
+        PREFIX ""
+        SUFFIX ".node"
+    )
+endif (NODE_FOUND)
