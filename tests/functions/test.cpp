@@ -60,6 +60,20 @@ TEST(Test, call_to_js_with_self)
     EXPECT_EQ(callback_result, "hello");
 }
 
+TEST(Test, call_to_js_with_null)
+{
+    auto callback_result = v8cpp::run_script<std::string>(
+    R"(
+        var module = require("./test-functions-module");
+
+        var caller = new module.TestCaller(function() {})
+
+        caller.is_null(null);
+    )");
+
+    EXPECT_EQ(callback_result, "null");
+}
+
 TEST(Test, call_from_js)
 {
     auto result = v8cpp::run_script<std::string>(

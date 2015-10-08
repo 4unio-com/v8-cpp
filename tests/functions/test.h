@@ -59,6 +59,16 @@ public:
         return v8cpp::call_v8_with_receiver(v8::Isolate::GetCurrent(), receiver, to_be_called_with_shared);
     }
 
+    std::string is_null(std::shared_ptr<Shared> p)
+    {
+        std::string r = "not null";
+        if (!p)
+        {
+            r = "null";
+        }
+        return r;
+    }
+
 private:
     v8::Persistent<v8::Function> cb_;
 };

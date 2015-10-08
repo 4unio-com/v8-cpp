@@ -33,6 +33,7 @@ void InitAll(Local<Object> exports)
             .set_constructor<Local<Function>>()
             .add_method("get_shared", &TestCaller::get_shared)
             .add_method("call_me_with_shared", &TestCaller::call_me_with_shared)
+            .add_method("is_null", &TestCaller::is_null)
             .add_method("call_me", &TestCaller::call_me);
 
     // Prepare Shared binding
