@@ -37,8 +37,9 @@ void InitAll(Local<Object> exports)
             .add_method("embedded_class_ptr", &TestClass::embedded_class_ptr)
             .add_method("embedded_class_ref", &TestClass::embedded_class_ref)
             .add_method("embedded_class_copy", &TestClass::embedded_class_copy)
-            .add_method("replace_i", &TestClass::replace_i)
-            .add_method("add_i", &TestClass::add_i);
+            .add_method("remove_ptr", &TestClass::remove_ptr)
+            .add_method("remove_sptr", &TestClass::remove_sptr)
+            .add_method("add_ref", &TestClass::add_ref);
 
     // Prepare EmbeddedTestClass binding
     v8cpp::Class<EmbeddedTestClass> embeddedtestclass(isolate);

@@ -117,6 +117,34 @@ TEST(Test, incorrect_function_args)
     {
         EXPECT_STREQ(e.what(), "Uncaught Error: argument count does not match the corresponding C++ function definition");
     }
+
+    try
+    {
+        v8cpp::run_script(
+        R"(
+            var module = require("./test-errors-module");
+            var test_object = new module.TestClass(1, 2);
+            test_object.expect_sptr(function x(){});
+        )");
+    }
+    catch (std::exception const& e)
+    {
+        EXPECT_STREQ(e.what(), "Uncaught Error: expected an exported object");
+    }
+
+    try
+    {
+        v8cpp::run_script(
+        R"(
+            var module = require("./test-errors-module");
+            var test_object = new module.TestClass(1, 2);
+            test_object.expect_obj(null);
+        )");
+    }
+    catch (std::exception const& e)
+    {
+        EXPECT_STREQ(e.what(), "Uncaught Error: expected an exported object");
+    }
 }
 
 TEST(Test, conversion_errors)

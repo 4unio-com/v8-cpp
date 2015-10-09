@@ -405,7 +405,7 @@ struct Convert<T, typename std::enable_if<IsExportedClass<T>::value>::type>
 
     static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
-        return !value.IsEmpty() && value->IsObject();
+        return !value.IsEmpty() && (value->IsObject() || value->IsNull());
     }
 
     static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
@@ -445,7 +445,7 @@ struct Convert<T*, typename std::enable_if<IsExportedClass<T>::value>::type>
 
     static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
     {
-        return !value.IsEmpty() && value->IsObject();
+        return !value.IsEmpty() && (value->IsObject() || value->IsNull());
     }
 
     static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)

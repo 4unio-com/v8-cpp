@@ -99,55 +99,55 @@ TEST(Test, object_from_js)
         var test_object = module.new_TestClass(1, 2);
         var test_object2 = module.new_TestClass(1, 2);
 
-        test_object.replace_i(test_object2.embedded_class_copy());
+        test_object.remove_ptr(test_object2.embedded_class_copy());
         test_object;
     )");
+
+    EXPECT_EQ(test_object.i(), 4);
+
+    test_object = v8cpp::run_script<TestClass>(
+    R"(
+        var module = require("./test-objects-module");
+        var test_object = module.new_TestClass(1, 2);
+        var test_object2 = module.new_TestClass(1, 2);
+
+        test_object.remove_ptr(null);
+        test_object;
+    )");
+
+    EXPECT_EQ(test_object.i(), 3);
+
+    test_object = v8cpp::run_script<TestClass>(
+    R"(
+        var module = require("./test-objects-module");
+        var test_object = module.new_TestClass(1, 2);
+        var test_object2 = module.new_TestClass(1, 2);
+
+        test_object.remove_sptr(null);
+        test_object;
+    )");
+
+    EXPECT_EQ(test_object.i(), 3);
 
     auto result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
+        var test_object2 = module.new_TestClass(1, 2);
 
-        var embedded_object = test_object.embedded_class_uptr();
-        embedded_object.i();
+        test_object.add_ref(test_object2.embedded_class_ref());
     )");
 
-    EXPECT_EQ(result, -1);
+    EXPECT_EQ(result, 2);
 
-    auto result2 = v8cpp::run_script<int>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-
-        var embedded_object = test_object.embedded_class_sptr();
-        embedded_object.i();
-    )");
-
-    EXPECT_EQ(result2, -1);
-
-    EXPECT_EQ(test_object.i(), -1);
-
-    auto result3 = v8cpp::run_script<int>(
+    result = v8cpp::run_script<int>(
     R"(
         var module = require("./test-objects-module");
         var test_object = module.new_TestClass(1, 2);
         var test_object2 = module.new_TestClass(1, 2);
 
-        test_object.add_i(test_object.embedded_class_ptr(),
-                          test_object2.embedded_class_ref());
+        test_object.add_ref(test_object2.embedded_class_uptr());
     )");
 
-    EXPECT_EQ(result3, -2);
-
-    auto result4 = v8cpp::run_script<int>(
-    R"(
-        var module = require("./test-objects-module");
-        var test_object = module.new_TestClass(1, 2);
-        var test_object2 = module.new_TestClass(1, 2);
-
-        test_object.add_i(test_object.embedded_class_sptr(),
-                          test_object2.embedded_class_uptr());
-    )");
-
-    EXPECT_EQ(result4, -2);
+    EXPECT_EQ(result, 2);
 }

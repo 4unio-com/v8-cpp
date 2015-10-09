@@ -82,14 +82,25 @@ public:
         return *embedded_class_;
     }
 
-    void replace_i(EmbeddedTestClass const& other)
+    void remove_ptr(EmbeddedTestClass* other)
     {
-        i_ = other.i();
+        if (other)
+        {
+            i_ -= other->i();
+        }
     }
 
-    int add_i(EmbeddedTestClass const& other, EmbeddedTestClass const& other2)
+    void remove_sptr(std::shared_ptr<EmbeddedTestClass> const& other)
     {
-        return other.i() + other2.i();
+        if (other)
+        {
+            i_ -= other->i();
+        }
+    }
+
+    int add_ref(EmbeddedTestClass const& other)
+    {
+        return i_ += other.i();
     }
 
 private:

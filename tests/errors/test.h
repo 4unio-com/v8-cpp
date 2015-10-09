@@ -20,6 +20,8 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+
 class TestClass
 {
 public:
@@ -31,6 +33,16 @@ public:
     int i() const
     {
         return i_;
+    }
+
+    int expect_sptr(std::shared_ptr<TestClass> x) const
+    {
+        return 1;
+    }
+
+    int expect_obj(TestClass x) const
+    {
+        return 1;
     }
 
     void throw_ex()

@@ -32,6 +32,8 @@ void InitAll(Local<Object> exports)
     testclass
             .set_constructor<int, int>()
             .add_method("i", &TestClass::i)
+            .add_method("expect_sptr", &TestClass::expect_sptr)
+            .add_method("expect_obj", &TestClass::expect_obj)
             .add_method("throw_ex", &TestClass::throw_ex);
 
     // Prepare module

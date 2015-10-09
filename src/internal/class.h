@@ -170,6 +170,12 @@ public:
     {
         v8::HandleScope scope(isolate_);
 
+        if (value->IsNull())
+        {
+            static T nullsptr(nullptr);
+            return &nullsptr;
+        }
+
         while (value->IsObject())
         {
             v8::Local<v8::Object> object = value->ToObject();
@@ -184,13 +190,18 @@ public:
             }
             value = object->GetPrototype();
         }
-        return nullptr;
+        throw std::invalid_argument("expected an exported object");
     }
 
     template <typename O>
     typename std::enable_if<!IsSharedPointer<O>::value, O*>::type import_object(v8::Local<v8::Value> value)
     {
         v8::HandleScope scope(isolate_);
+
+        if (value->IsNull())
+        {
+            return nullptr;
+        }
 
         while (value->IsObject())
         {
@@ -206,7 +217,7 @@ public:
             }
             value = object->GetPrototype();
         }
-        return nullptr;
+        throw std::invalid_argument("expected an exported object");
     }
 
     template <typename P>
