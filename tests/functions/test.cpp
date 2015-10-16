@@ -81,4 +81,31 @@ TEST(Test, call_from_js)
     EXPECT_FLOAT_EQ(result2[1], 3);
     EXPECT_FLOAT_EQ(result2[2], 2.1);
     EXPECT_FLOAT_EQ(result2[3], 0);
+
+    auto result3 = v8cpp::run_script<std::list<float>>(
+    R"(
+        var module = require("./test-functions-module");
+        module.complex_list_function(4, "3", 2.1, false);
+    )");
+
+    ASSERT_EQ(result3.size(), 4);
+    EXPECT_FLOAT_EQ(result3.front(), 4);
+    result3.pop_front();
+    EXPECT_FLOAT_EQ(result3.front(), 3);
+    result3.pop_front();
+    EXPECT_FLOAT_EQ(result3.front(), 2.1);
+    result3.pop_front();
+    EXPECT_FLOAT_EQ(result3.front(), 0);
+    result3.pop_front();
+
+    auto result4 = v8cpp::run_script<std::set<std::string>>(
+    R"(
+        var module = require("./test-functions-module");
+        module.complex_set_function(4, "3", false);
+    )");
+
+    ASSERT_EQ(result4.size(), 3);
+    EXPECT_FLOAT_EQ(result4.count("4"), 1);
+    EXPECT_FLOAT_EQ(result4.count("3"), 1);
+    EXPECT_FLOAT_EQ(result4.count("0"), 1);
 }

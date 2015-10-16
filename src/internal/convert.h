@@ -19,9 +19,11 @@
 #pragma once
 
 #include <climits>
-#include <vector>
+#include <list>
 #include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
 #include <v8.h>
 
@@ -276,6 +278,98 @@ struct Convert<std::vector<T, Alloc>>
     }
 };
 
+// Array converter
+template <typename T, typename Alloc>
+struct Convert<std::list<T, Alloc>>
+{
+    using FromType = std::list<T, Alloc>;
+    using ToType = v8::Local<v8::Array>;
+
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
+    {
+        return !value.IsEmpty() && value->IsArray();
+    }
+
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
+    {
+        if (!is_valid(isolate, value))
+        {
+            throw std::invalid_argument("expected array value");
+        }
+
+        v8::HandleScope scope(isolate);
+        v8::Local<v8::Array> array = value.As<v8::Array>();
+
+        FromType result;
+        for (uint32_t i = 0, count = array->Length(); i < count; ++i)
+        {
+            result.push_back(Convert<T>::from_v8(isolate, array->Get(i)));
+        }
+        return result;
+    }
+
+    static ToType to_v8(v8::Isolate* isolate, FromType const& value)
+    {
+        v8::EscapableHandleScope scope(isolate);
+
+        uint32_t size = static_cast<uint32_t>(value.size());
+        v8::Local<v8::Array> result = v8::Array::New(isolate, size);
+        size_t i = 0;
+        for (auto & e: value)
+        {
+            result->Set(i, Convert<T>::to_v8(isolate, e));
+            ++i;
+        }
+        return scope.Escape(result);
+    }
+};
+
+// Array converter
+template <typename T, typename Alloc>
+struct Convert<std::set<T, Alloc>>
+{
+    using FromType = std::set<T, Alloc>;
+    using ToType = v8::Local<v8::Array>;
+
+    static bool is_valid(v8::Isolate*, v8::Local<v8::Value> value)
+    {
+        return !value.IsEmpty() && value->IsArray();
+    }
+
+    static FromType from_v8(v8::Isolate* isolate, v8::Local<v8::Value> value)
+    {
+        if (!is_valid(isolate, value))
+        {
+            throw std::invalid_argument("expected array value");
+        }
+
+        v8::HandleScope scope(isolate);
+        v8::Local<v8::Array> array = value.As<v8::Array>();
+
+        FromType result;
+        for (uint32_t i = 0, count = array->Length(); i < count; ++i)
+        {
+            result.insert(Convert<T>::from_v8(isolate, array->Get(i)));
+        }
+        return result;
+    }
+
+    static ToType to_v8(v8::Isolate* isolate, FromType const& value)
+    {
+        v8::EscapableHandleScope scope(isolate);
+
+        uint32_t size = static_cast<uint32_t>(value.size());
+        v8::Local<v8::Array> result = v8::Array::New(isolate, size);
+        size_t i = 0;
+        for (auto & e: value)
+        {
+            result->Set(i, Convert<T>::to_v8(isolate, e));
+            ++i;
+        }
+        return scope.Escape(result);
+    }
+};
+
 // Map converter
 template <typename Key, typename Value, typename Less, typename Alloc>
 struct Convert<std::map<Key, Value, Less, Alloc>>
@@ -383,6 +477,12 @@ struct IsExportedClass<std::basic_string<Char, Traits, Alloc>> : std::false_type
 
 template <typename T, typename Alloc>
 struct IsExportedClass<std::vector<T, Alloc>> : std::false_type {};
+
+template <typename T, typename Alloc>
+struct IsExportedClass<std::list<T, Alloc>> : std::false_type {};
+
+template <typename T, typename Alloc>
+struct IsExportedClass<std::set<T, Alloc>> : std::false_type {};
 
 template <typename Key, typename Value, typename Less, typename Alloc>
 struct IsExportedClass<std::map<Key, Value, Less, Alloc>> : std::false_type {};

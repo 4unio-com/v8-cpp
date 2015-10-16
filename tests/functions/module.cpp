@@ -18,6 +18,10 @@
 
 #include "test.h"
 
+#include <set>
+#include <vector>
+#include <list>
+
 #include <v8-cpp.h>
 
 using namespace v8;
@@ -45,7 +49,10 @@ void InitAll(Local<Object> exports)
     module.add_class("TestCaller", testcaller);
     module.add_class("Shared", shared);
     module.add_function("simple_function", &simple_function);
+
+    module.add_function("complex_list_function", &complex_list_function);
     module.add_function("complex_function", &complex_function);
+    module.add_function("complex_set_function", &complex_set_function);
 
     exports->SetPrototype(module.create_prototype());
 }

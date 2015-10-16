@@ -82,3 +82,31 @@ std::vector<float> complex_function(int first, std::string const& second, float 
     num_list.push_back(forth);
     return num_list;
 }
+
+std::list<float> complex_list_function(int first, std::string const& second, float third, bool forth)
+{
+    EXPECT_EQ(first, 4);
+    EXPECT_EQ(second, "3");
+    EXPECT_FLOAT_EQ(third, 2.1);
+    EXPECT_EQ(forth, false);
+
+    std::list<float> nums;
+    nums.push_back(first);
+    nums.push_back(stoi(second));
+    nums.push_back(third);
+    nums.push_back(forth);
+    return nums;
+}
+
+std::set<std::string> complex_set_function(int first, std::string const& second, bool third)
+{
+    EXPECT_EQ(first, 4);
+    EXPECT_EQ(second, "3");
+    EXPECT_EQ(third, false);
+
+    std::set<std::string> nums;
+    nums.insert(std::to_string(first));
+    nums.insert(second);
+    nums.insert(std::to_string(third));
+    return nums;
+}
