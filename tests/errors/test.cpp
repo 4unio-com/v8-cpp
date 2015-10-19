@@ -213,6 +213,22 @@ TEST(Test, conversion_errors)
     {
         EXPECT_STREQ(e.what(), "expected an exported object");
     }
+    try
+    {
+        v8cpp::run_script<std::list<char>>("1");
+    }
+    catch (std::exception const& e)
+    {
+        EXPECT_STREQ(e.what(), "expected list value");
+    }
+    try
+    {
+        v8cpp::run_script<std::set<char>>("1");
+    }
+    catch (std::exception const& e)
+    {
+        EXPECT_STREQ(e.what(), "expected set value");
+    }
 }
 
 TEST(Test, throw_from_module)

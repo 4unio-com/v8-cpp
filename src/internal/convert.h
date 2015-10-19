@@ -278,7 +278,7 @@ struct Convert<std::vector<T, Alloc>>
     }
 };
 
-// Array converter
+// List converter
 template <typename T, typename Alloc>
 struct Convert<std::list<T, Alloc>>
 {
@@ -294,7 +294,7 @@ struct Convert<std::list<T, Alloc>>
     {
         if (!is_valid(isolate, value))
         {
-            throw std::invalid_argument("expected array value");
+            throw std::invalid_argument("expected list value");
         }
 
         v8::HandleScope scope(isolate);
@@ -324,7 +324,7 @@ struct Convert<std::list<T, Alloc>>
     }
 };
 
-// Array converter
+// Set converter
 template <typename T, typename Alloc>
 struct Convert<std::set<T, Alloc>>
 {
@@ -340,7 +340,7 @@ struct Convert<std::set<T, Alloc>>
     {
         if (!is_valid(isolate, value))
         {
-            throw std::invalid_argument("expected array value");
+            throw std::invalid_argument("expected set value");
         }
 
         v8::HandleScope scope(isolate);
