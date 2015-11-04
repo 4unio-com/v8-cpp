@@ -151,3 +151,15 @@ TEST(Test, object_from_js)
 
     EXPECT_EQ(result, 2);
 }
+
+TEST(Test, construct_var_args_class_via_new)
+{
+    auto test_object = v8cpp::run_script<TestClassVariableConstructorArgs>(
+    R"(
+        var module = require("./test-objects-module");
+        var test_object = new module.TestClassVariableConstructorArgs(1, 2, "me");
+        test_object;
+    )");
+
+    EXPECT_EQ(test_object.zero(), 1);
+}
