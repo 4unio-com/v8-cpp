@@ -95,13 +95,4 @@ TEST(Test, call_overload_method_from_js)
     )");
 
     EXPECT_EQ(result, 5);
-
-    auto result2 = v8cpp::run_script<std::string>(
-    R"(
-        var module = require("./test-methods-module");
-        var test_object = new module.TestClass();
-        test_object.overload_method(1, 5);
-    )");
-
-    EXPECT_EQ(result2, "6");
 }

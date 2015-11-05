@@ -97,10 +97,14 @@ template <typename F>
 using IsolateV8ArgsCallTraits = V8ArgsCallTraits<F, 1>;
  
 template <typename F, size_t Offset>
-using IsDirectArgs = std::integral_constant<bool,
-                                            CallFromV8Traits<F>::arg_count == (Offset + 1) &&
-                                                std::is_same<typename CallFromV8Traits<F>::template ArgType<Offset>,
-                                                             v8::FunctionCallbackInfo<v8::Value> >::value>;
+using IsDirectArgs =
+  std::integral_constant<bool,
+    CallFromV8Traits<F>::arg_count == (Offset + 1)
+    && std::is_same<
+         typename std::remove_const<
+                 typename std::remove_reference<typename CallFromV8Traits<F>::template ArgType<Offset>>::type
+             >::type,
+         v8::FunctionCallbackInfo<v8::Value>>::value>;
 
 template <typename F>
 using IsFirstArgIsolate =
