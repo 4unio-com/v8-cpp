@@ -27,6 +27,12 @@ void InitAll(Local<Object> exports)
     // Get current isolate
     Isolate* isolate = Isolate::GetCurrent();
 
+    // Prepare TestClassVariableConstructorArgs binding
+    v8cpp::Class<TestClassVariableConstructorArgs> testvarargsclass(isolate);
+    testvarargsclass
+      .set_constructor<v8::FunctionCallbackInfo<v8::Value>>()
+      .add_method("zero", &TestClassVariableConstructorArgs::zero);
+
     // Prepare TestClass binding
     v8cpp::Class<TestClass> testclass(isolate);
     testclass
@@ -52,6 +58,7 @@ void InitAll(Local<Object> exports)
 
     module.add_class("TestClass", testclass);
     module.add_class("EmbeddedTestClass", embeddedtestclass);
+    module.add_class("TestClassVariableConstructorArgs", testvarargsclass);
 
     module.add_function("new_TestClass", &new_TestClass);
 

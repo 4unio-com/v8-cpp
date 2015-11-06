@@ -22,6 +22,8 @@
 
 #include <memory>
 
+#include <v8-cpp.h>
+
 class EmbeddedTestClass
 {
 public:
@@ -39,6 +41,23 @@ public:
 
 private:
     int i_;
+};
+
+class TestClassVariableConstructorArgs
+{
+public:
+    TestClassVariableConstructorArgs(v8::FunctionCallbackInfo<v8::Value> const& args) {
+    if (args.Length() > 0 && args[0]->IsNumber()) {
+        v_ = args[0]->ToNumber()->Value();
+      }
+    }
+
+    int zero() const {
+      return v_;
+    }
+
+ private:
+    int v_;
 };
 
 class TestClass
