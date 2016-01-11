@@ -109,3 +109,15 @@ TEST(Test, call_from_js)
     EXPECT_FLOAT_EQ(result4.count("3"), 1);
     EXPECT_FLOAT_EQ(result4.count("0"), 1);
 }
+
+TEST(Test, call_return_enum)
+{
+    auto result = v8cpp::run_script<TestCaller::TestEnum>(
+    R"(
+        var module = require("./test-functions-module");
+        var tc = new module.TestCaller(function() {});
+        tc.return_enum_function();
+    )");
+
+    EXPECT_EQ(result, TestCaller::TestEnum::ONE);
+}

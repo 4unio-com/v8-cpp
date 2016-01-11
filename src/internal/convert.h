@@ -156,7 +156,8 @@ struct Convert<T, typename std::enable_if<std::is_integral<T>::value>::type>
         }
     }
 
-    static ToType to_v8(v8::Isolate* isolate, T value)
+    template <typename O>
+    static ToType to_v8(v8::Isolate* isolate, O value)
     {
         if (bits <= 32)
         {
