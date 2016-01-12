@@ -34,9 +34,22 @@ public:
 class TestCaller
 {
 public:
+    enum class TestEnum
+    {
+        ZERO,
+        ONE,
+        TWO,
+        THREE
+    };
+
     explicit TestCaller(v8::Local<v8::Function> const& cb)
         : cb_(v8::Isolate::GetCurrent(), cb)
     {
+    }
+
+    TestEnum return_enum_function() const
+    {
+      return TestEnum::ONE;
     }
 
     std::string call_me() const

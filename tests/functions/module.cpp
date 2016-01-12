@@ -37,7 +37,8 @@ void InitAll(Local<Object> exports)
             .set_constructor<Local<Function>>()
             .add_method("get_shared", &TestCaller::get_shared)
             .add_method("call_me_with_shared", &TestCaller::call_me_with_shared)
-            .add_method("call_me", &TestCaller::call_me);
+            .add_method("call_me", &TestCaller::call_me)
+            .add_method("return_enum_function", &TestCaller::return_enum_function);
 
     // Prepare Shared binding
     v8cpp::Class<Shared> shared(isolate);
