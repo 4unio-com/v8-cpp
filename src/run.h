@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Canonical Ltd
+ * Copyright (C) 2015, 2016 Canonical Ltd
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License version 3 as
@@ -26,37 +26,39 @@
 namespace v8cpp
 {
 
-template <typename T = v8::Local<v8::Value>>
-T run_script(std::string const& source, std::string const& filename = "")
+template <typename T>
+struct RunScriptTraits
 {
-    // Create an isolate
-    std::shared_ptr<v8::Isolate> isolate(v8::Isolate::New(), [](v8::Isolate* isolate)
+    typedef v8::HandleScope Scope;
+    template <typename U>
+    static T escape(U& scope, T v)
     {
-        // Force garbage collection before returning
-        std::string const v8_flags = "--expose_gc";
-        v8::V8::SetFlagsFromString(v8_flags.data(), (int)v8_flags.length());
-        isolate->RequestGarbageCollectionForTesting(v8::Isolate::GarbageCollectionType::kFullGarbageCollection);
+        return v;
+    }
+};
 
-        // Clean up
-        using ClassInstances = std::vector<v8cpp::internal::Class<void>*>;
-        ClassInstances* instances = static_cast<ClassInstances*>(isolate->GetData(0));
-        if (instances)
-        {
-            for (auto instance : *instances)
-            {
-                delete instance;
-            }
-        }
-        delete instances;
-        isolate->SetData(0, nullptr);
-        isolate->Dispose();
-    });
+template <>
+struct RunScriptTraits<v8::Local<v8::Value>>
+{
+    typedef v8::EscapableHandleScope Scope;
+    template <typename U>
+    static v8::Local<v8::Value> escape(U& scope, v8::Local<v8::Value> v)
+    {
+        return scope.Escape(v);
+    }
+};
 
-    // Create an isolate scope.
-    v8::Isolate::Scope isolate_scope(isolate.get());
+template <typename T = v8::Local<v8::Value>>
+T run_script_with_isolate(std::shared_ptr<v8::Isolate> isolate,
+                          std::string const& source,
+                          std::string const& filename = "")
+{
+    if (! isolate) {
+      throw std::runtime_error("Invalid isolate");
+    }
 
     // Create a stack-allocated handle scope.
-    v8::HandleScope handle_scope(isolate.get());
+    typename RunScriptTraits<T>::Scope escapable_handle_scope(isolate.get());
 
     // Prepare console class
     v8cpp::Class<internal::Console> console(isolate.get());
@@ -114,7 +116,43 @@ T run_script(std::string const& source, std::string const& filename = "")
         throw std::runtime_error(v8cpp::from_v8<std::string>(isolate.get(), try_catch.Message()->Get()));
     }
 
-    return v8cpp::from_v8<T>(isolate.get(), result);
+    return RunScriptTraits<T>::escape(
+         escapable_handle_scope,
+         v8cpp::from_v8<T>(isolate.get(), result)
+    );
+}
+
+template <typename T = v8::Local<v8::Value>>
+T run_script(std::string const& source, std::string const& filename = "")
+{
+    // Create an isolate
+    std::shared_ptr<v8::Isolate> isolate(v8::Isolate::New(), [](v8::Isolate* isolate)
+    {
+        // Force garbage collection before returning
+        std::string const v8_flags = "--expose_gc";
+        v8::V8::SetFlagsFromString(v8_flags.data(), (int)v8_flags.length());
+        isolate->RequestGarbageCollectionForTesting(v8::Isolate::GarbageCollectionType::kFullGarbageCollection);
+
+        // Clean up
+        using ClassInstances = std::vector<v8cpp::internal::Class<void>*>;
+        ClassInstances* instances = static_cast<ClassInstances*>(isolate->GetData(0));
+        if (instances)
+        {
+            for (auto instance : *instances)
+            {
+                delete instance;
+            }
+        }
+        delete instances;
+        isolate->SetData(0, nullptr);
+        isolate->Dispose();
+    });
+
+    // Create an isolate scope.
+    v8::Isolate::Scope isolate_scope(isolate.get());
+    v8::HandleScope handle_scope(isolate.get());
+
+    return run_script_with_isolate<T>(isolate, source, filename);
 }
 
 template <typename T = v8::Local<v8::Value>>

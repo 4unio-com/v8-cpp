@@ -121,3 +121,53 @@ TEST(Test, call_return_enum)
 
     EXPECT_EQ(result, TestCaller::TestEnum::ONE);
 }
+
+TEST(Test, can_convert)
+{
+    std::shared_ptr<v8::Isolate> i(v8::Isolate::New(), [](v8::Isolate* isolate)
+    {
+      std::cerr << "conte" << std::endl;
+        // Force garbage collection before returning
+        std::string const v8_flags = "--expose_gc";
+        v8::V8::SetFlagsFromString(v8_flags.data(), (int)v8_flags.length());
+        isolate->RequestGarbageCollectionForTesting(
+            v8::Isolate::GarbageCollectionType::kFullGarbageCollection);
+
+        // Clean up
+        using ClassInstances = std::vector<v8cpp::internal::Class<void>*>;
+        ClassInstances* instances = static_cast<ClassInstances*>(isolate->GetData(0));
+        if (instances)
+        {
+            for (auto instance : *instances)
+            {
+                delete instance;
+            }
+        }
+        delete instances;
+        isolate->SetData(0, nullptr);
+        isolate->Dispose();
+    });
+
+    v8::Isolate::Scope isolate_scope(i.get());
+    v8::HandleScope handle_scope(i.get());
+
+    auto test_object
+      = v8cpp::run_script_with_isolate(i,
+    R"(
+        var module = require("./test-functions-module");
+        new module.TestCaller(function() {})
+    )");
+
+    #if 0
+    auto test_string
+      = v8cpp::run_script_with_isolate(i,
+    R"(
+        var module = require("./test-functions-module");
+        module.simple_function()
+    )");
+    EXPECT_EQ(v8cpp::can_convert_from_v8<TestCaller>(i.get(), test_string), false);
+    EXPECT_EQ(v8cpp::can_convert_from_v8<std::string>(i.get(), test_string), true);
+    EXPECT_EQ(v8cpp::can_convert_from_v8<int>(i.get(), test_string), false);
+    EXPECT_EQ(v8cpp::can_convert_from_v8<Shared>(i.get(), test_string), false);
+    #endif
+}
